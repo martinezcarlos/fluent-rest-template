@@ -15,13 +15,14 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate.service;
+package mart.karl.fluentresttemplate.uri.service;
 
-import java.net.URI;
-import java.util.Collections;
 import lombok.experimental.SuperBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.Collections;
 
 @SuperBuilder
 public class BaseService extends Service {

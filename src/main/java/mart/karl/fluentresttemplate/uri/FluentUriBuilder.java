@@ -15,17 +15,31 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate.executor;
+package mart.karl.fluentresttemplate.uri;
 
-import java.util.Map;
+import mart.karl.fluentresttemplate.executor.Executor;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.Nullable;
+import org.springframework.util.MultiValueMap;
 
-public interface UriBuilder {
-  UriBuilder withUriVariables(final Map<String, Object> uriVariables);
+import java.util.Collection;
+import java.util.Map;
 
-  UriBuilder withQueryParams(final Map<String, Object> queryParams);
+public interface FluentUriBuilder {
 
-  UriBuilder withHeaders(final HttpHeaders headers);
+  FluentUriBuilder queryParam(String name, Object... values);
+
+  FluentUriBuilder queryParam(String name, @Nullable Collection<?> values);
+
+  FluentUriBuilder queryParams(Map<String, ?> params);
+
+  FluentUriBuilder queryParams(MultiValueMap<String, String> params);
+
+  FluentUriBuilder uriVariable(String name, Object value);
+
+  FluentUriBuilder uriVariables(Map<String, ?> variables);
+
+  FluentUriBuilder withHeaders(final HttpHeaders headers);
 
   Executor executor();
 }

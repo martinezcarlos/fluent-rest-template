@@ -15,19 +15,16 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate.service;
+package mart.karl.fluentresttemplate.uri.service;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.*;
 
 @Setter
 @SuperBuilder
@@ -79,7 +76,7 @@ public abstract class Service {
       queryParams.forEach(
           (k, v) -> {
             if (v instanceof Collection) {
-              uriComponentsBuilder.queryParam(k, ((Collection) v).toArray());
+              uriComponentsBuilder.queryParam(k, ((Collection<?>) v).toArray());
             } else {
               uriComponentsBuilder.queryParam(k, v);
             }

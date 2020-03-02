@@ -17,11 +17,8 @@
 
 package mart.karl.fluentresttemplate.executor;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import mart.karl.fluentresttemplate.service.BaseService;
-import mart.karl.fluentresttemplate.service.Service;
+import mart.karl.fluentresttemplate.uri.service.BaseService;
+import mart.karl.fluentresttemplate.uri.service.Service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,12 +31,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 // TODO: improve existing tests and add new ones
 @SpringBootTest
-class ExecutorManagerTest {
+class FluentRestTemplateTest {
 
   private static final String POSTMAN_ECHO_GET = "https://postman-echo.com/get?foo1=bar1&foo2=bar2";
   private static final String POSTMAN_ECHO_POST = "https://postman-echo.com/post";
@@ -47,12 +48,15 @@ class ExecutorManagerTest {
   private static final String POSTMAN_ECHO_PATCH = "https://postman-echo.com/patch";
   private static final String POSTMAN_ECHO_DELETE = "https://postman-echo.com/delete";
   private static final ParameterizedTypeReference<String> STRING_TYPE_REFERENCE =
-      new ParameterizedTypeReference<String>() {};
+      new ParameterizedTypeReference<String>() {
+      };
 
-  @Autowired private ExecutorManager manager;
+  @Autowired
+  private FluentRestTemplate manager;
 
   @BeforeEach
-  void setUp() {}
+  void setUp() {
+  }
 
   @Test
   void getVoid() {
@@ -97,7 +101,7 @@ class ExecutorManagerTest {
         manager
             .post()
             .into(POSTMAN_ECHO_POST)
-            .withQueryParams(queryParams)
+            .queryParams(queryParams)
             .withHeaders(headers)
             .executor()
             .execute(STRING_TYPE_REFERENCE);
@@ -114,7 +118,7 @@ class ExecutorManagerTest {
         manager
             .post("Test String")
             .into(UriComponentsBuilder.fromUriString(POSTMAN_ECHO_POST).build().toUri())
-            .withQueryParams(queryParams)
+            .queryParams(queryParams)
             .withHeaders(headers)
             .executor()
             .execute(STRING_TYPE_REFERENCE);
@@ -140,7 +144,7 @@ class ExecutorManagerTest {
         manager
             .put()
             .into(service, BaseService.UNIQUE_ENDPOINT_NAME)
-            .withQueryParams(queryParams)
+            .queryParams(queryParams)
             .executor()
             .execute(STRING_TYPE_REFERENCE);
     assertThat(execute).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
@@ -155,7 +159,7 @@ class ExecutorManagerTest {
         manager
             .put("Test String")
             .into(POSTMAN_ECHO_PUT)
-            .withQueryParams(queryParams)
+            .queryParams(queryParams)
             .executor()
             .execute(STRING_TYPE_REFERENCE);
     assertThat(execute).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);

@@ -18,38 +18,40 @@
 package mart.karl.fluentresttemplate.executor;
 
 import lombok.RequiredArgsConstructor;
+import mart.karl.fluentresttemplate.uri.UriBodyStarter;
+import mart.karl.fluentresttemplate.uri.UriStarter;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 @Component
 @RequiredArgsConstructor
-public final class ExecutorManager {
+public final class FluentRestTemplate {
 
   private final RestTemplate restTemplate;
 
   public UriStarter get() {
-    return new ExecutorManagerBuilder<>(restTemplate, HttpMethod.GET, null);
+    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.GET, null);
   }
 
   public UriStarter delete() {
-    return new ExecutorManagerBuilder<>(restTemplate, HttpMethod.DELETE, null);
+    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.DELETE, null);
   }
 
   public UriBodyStarter post() {
-    return new ExecutorManagerBuilder<>(restTemplate, HttpMethod.POST, null);
+    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.POST, null);
   }
 
   public <T> UriBodyStarter post(final T body) {
-    return new ExecutorManagerBuilder<>(restTemplate, HttpMethod.POST, body);
+    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.POST, body);
   }
 
   public UriBodyStarter put() {
-    return new ExecutorManagerBuilder<>(restTemplate, HttpMethod.PUT, null);
+    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.PUT, null);
   }
 
   public <T> UriBodyStarter put(final T body) {
-    return new ExecutorManagerBuilder<>(restTemplate, HttpMethod.PUT, body);
+    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.PUT, body);
   }
 
   public UriBodyStarter patch() {
