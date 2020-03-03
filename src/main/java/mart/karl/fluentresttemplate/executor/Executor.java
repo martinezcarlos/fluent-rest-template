@@ -18,10 +18,28 @@
 package mart.karl.fluentresttemplate.executor;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
+
+import java.nio.charset.Charset;
+import java.util.function.Consumer;
 
 public interface Executor {
+  Executor header(String name, String... values);
+
+  Executor headers(@Nullable HttpHeaders headers);
+
+  Executor headers(Consumer<HttpHeaders> consumer);
+
+  Executor accept(MediaType... types);
+
+  Executor acceptCharset(Charset... charsets);
+
   ResponseEntity<Void> execute();
+
+  <O> ResponseEntity<O> execute(final Class<O> responseClass);
 
   <O> ResponseEntity<O> execute(final ParameterizedTypeReference<O> typeReference);
 }

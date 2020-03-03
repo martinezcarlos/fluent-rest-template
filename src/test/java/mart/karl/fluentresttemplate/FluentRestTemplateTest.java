@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate.executor;
+package mart.karl.fluentresttemplate;
 
 import mart.karl.fluentresttemplate.uri.service.BaseService;
 import mart.karl.fluentresttemplate.uri.service.Service;
@@ -102,8 +102,8 @@ class FluentRestTemplateTest {
             .post()
             .into(POSTMAN_ECHO_POST)
             .queryParams(queryParams)
-            .withHeaders(headers)
             .executor()
+            .headers(headers)
             .execute(STRING_TYPE_REFERENCE);
     assertThat(execute).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
     assertThat(execute).extracting(HttpEntity::getBody).isNotNull();
@@ -119,8 +119,8 @@ class FluentRestTemplateTest {
             .post("Test String")
             .into(UriComponentsBuilder.fromUriString(POSTMAN_ECHO_POST).build().toUri())
             .queryParams(queryParams)
-            .withHeaders(headers)
             .executor()
+            .headers(headers)
             .execute(STRING_TYPE_REFERENCE);
     assertThat(execute).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
     assertThat(execute).extracting(HttpEntity::getBody).isNotNull();

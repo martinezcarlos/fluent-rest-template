@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate.executor;
+package mart.karl.fluentresttemplate;
 
 import lombok.RequiredArgsConstructor;
 import mart.karl.fluentresttemplate.uri.UriBodyStarter;
