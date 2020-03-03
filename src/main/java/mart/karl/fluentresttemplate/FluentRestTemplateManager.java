@@ -24,9 +24,9 @@ import mart.karl.fluentresttemplate.uri.UriStarter;
 import mart.karl.fluentresttemplate.uri.service.Service;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -35,8 +35,6 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
 
 final class FluentRestTemplateManager<T>
     implements UriStarter, UriBodyStarter, FluentUriBuilder, Executor {
@@ -48,8 +46,8 @@ final class FluentRestTemplateManager<T>
   private final Map<String, Object> uriVariables = new HashMap<>();
   private UriComponentsBuilder uriComponentsBuilder;
   private RequestEntity.BodyBuilder requestEntityBuilder;
-  private Service service;
-  private String serviceEndpointName;
+  //  private Service service;
+  //  private String serviceEndpointName;
 
   public FluentRestTemplateManager(
       final RestTemplate restTemplate, final HttpMethod httpMethod, final T body) {
@@ -72,8 +70,12 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public FluentUriBuilder from(final Service service, final String serviceEndpointName) {
-    this.service = service;
-    this.serviceEndpointName = serviceEndpointName;
+    //    this.service = service;
+    //    this.serviceEndpointName = serviceEndpointName;
+    if (service == null || StringUtils.isEmpty(serviceEndpointName)) {
+      throw new IllegalArgumentException("service and/or serviceEndpointName are invalid");
+    }
+    uriComponentsBuilder = service.getUriComponentsBuilder(serviceEndpointName, null);
     return this;
   }
 
@@ -91,8 +93,12 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public FluentUriBuilder into(final Service service, final String serviceEndpointName) {
-    this.service = service;
-    this.serviceEndpointName = serviceEndpointName;
+    //    this.service = service;
+    //    this.serviceEndpointName = serviceEndpointName;
+    if (service == null || StringUtils.isEmpty(serviceEndpointName)) {
+      throw new IllegalArgumentException("service and/or serviceEndpointName are invalid");
+    }
+    uriComponentsBuilder = service.getUriComponentsBuilder(serviceEndpointName, null);
     return this;
   }
 
@@ -104,12 +110,16 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public FluentUriBuilder queryParam(final String name, final Collection<?> values) {
-    uriComponentsBuilder.queryParam(name, values);
+    if (!CollectionUtils.isEmpty(values)) {
+      uriComponentsBuilder.queryParam(name, values.toArray());
+    }
+    // Activate when in Spring Boot version 2.2.5.RELEASE or older.
+    // uriComponentsBuilder.queryParam(name, values);
     return this;
   }
 
   @Override
-  public FluentUriBuilder queryParams(@Nullable final Map<String, ?> params) {
+  public FluentUriBuilder queryParams(final Map<String, ?> params) {
     if (!CollectionUtils.isEmpty(params)) {
       params.forEach(uriComponentsBuilder::queryParam);
     }
@@ -129,7 +139,7 @@ final class FluentRestTemplateManager<T>
   }
 
   @Override
-  public FluentUriBuilder uriVariables(@Nullable final Map<String, ?> variables) {
+  public FluentUriBuilder uriVariables(final Map<String, ?> variables) {
     if (!CollectionUtils.isEmpty(variables)) {
       uriVariables.putAll(variables);
     }
@@ -150,15 +160,20 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public Executor headers(final HttpHeaders headers) {
-    requestEntityBuilder.headers(headers);
+    if (headers != null) {
+      headers.forEach((k, v) -> requestEntityBuilder.header(k, v.toArray(new String[]{})));
+    }
+    // Activate this block when in Spring Boot version 2.2.5.RELEASE or older
+    // requestEntityBuilder.headers(headers);
     return this;
   }
 
-  @Override
-  public Executor headers(final Consumer<HttpHeaders> consumer) {
-    requestEntityBuilder.headers(consumer);
-    return this;
-  }
+  // Activate this block when in Spring Boot version 2.2.5.RELEASE or older
+  //  @Override
+  //  public Executor headers(final Consumer<HttpHeaders> consumer) {
+  //    requestEntityBuilder.headers(consumer);
+  //    return this;
+  //  }
 
   @Override
   public Executor accept(final MediaType... types) {
@@ -194,33 +209,17 @@ final class FluentRestTemplateManager<T>
   }
 
   private URI buildUri() {
-    return Optional.ofNullable(service)
-        .map(this::buildUriFromService)
-        .orElseGet(this::buildUriFromComponentsBuilder);
-  }
-
-  private URI buildUriFromService(final Service service) {
-    return service.getUri(serviceEndpointName, uriVariables, null);
-    //    return service.getUri(serviceEndpointName, uriVariables, queryParams);
-  }
-
-  //  private URI buildUriFromComponentsBuilder() {
-  //    if (!CollectionUtils.isEmpty(queryParams)) {
-  //      queryParams.forEach(
-  //          (k, v) -> {
-  //            if (v instanceof Collection) {
-  //              uriComponentsBuilder.queryParam(k, ((Collection<?>) v).toArray());
-  //            } else {
-  //              uriComponentsBuilder.queryParam(k, v);
-  //            }
-  //          });
-  //    }
-  //    return uriComponentsBuilder
-  //        .buildAndExpand(Optional.ofNullable(uriVariables).orElse(Collections.emptyMap()))
-  //        .toUri();
-  //  }
-
-  private URI buildUriFromComponentsBuilder() {
     return uriComponentsBuilder.buildAndExpand(uriVariables).toUri();
+    //    return Optional.ofNullable(service)
+    //        .map(this::buildUriFromService)
+    //        .orElseGet(this::buildUriFromComponentsBuilder);
   }
+
+  //  private URI buildUriFromService(final Service service) {
+  //    return service.getUri(serviceEndpointName, uriVariables);
+  //  }
+  //
+  //  private URI buildUriFromComponentsBuilder() {
+  //    return uriComponentsBuilder.buildAndExpand(uriVariables).toUri();
+  //  }
 }

@@ -41,18 +41,6 @@ public abstract class Service {
   private String version;
   private Map<String, String> endpoints;
 
-  public final URI getUri() {
-    return getUri(null);
-  }
-
-  public final URI getUri(final String endpointName) {
-    return getUri(endpointName, null);
-  }
-
-  public final URI getUri(final String endpointName, final Map<String, ?> uriVariables) {
-    return getUri(endpointName, uriVariables, null);
-  }
-
   public final URI getUri(
       final String endpointName,
       final Map<String, ?> uriVariables,
@@ -65,6 +53,15 @@ public abstract class Service {
       final Map<String, ?> uriVariables,
       final Map<String, ?> queryParams) {
     final UriComponentsBuilder uriComponentsBuilder =
+        getUriComponentsBuilder(endpointName, queryParams);
+    return CollectionUtils.isEmpty(uriVariables)
+        ? uriComponentsBuilder.build()
+        : uriComponentsBuilder.buildAndExpand(uriVariables);
+  }
+
+  public UriComponentsBuilder getUriComponentsBuilder(
+      final String endpointName, final Map<String, ?> queryParams) {
+    final UriComponentsBuilder uriComponentsBuilder =
         UriComponentsBuilder.newInstance()
             .scheme(scheme)
             .host(host)
@@ -72,14 +69,12 @@ public abstract class Service {
             .pathSegment(
                 baseContext,
                 version,
-                Objects.isNull(endpoints) ? null : endpoints.get(endpointName))
-            .uriVariables(
-                Optional.ofNullable(uriVariables)
-                    .map(Collections::<String, Object>unmodifiableMap)
-                    .orElse(Collections.emptyMap()));
+                Objects.isNull(endpoints) ? null : endpoints.get(endpointName));
     if (!CollectionUtils.isEmpty(queryParams)) {
       queryParams.forEach(
           (k, v) -> {
+            // Remove this if block when in Spring Boot version 2.2.5.RELEASE or older as
+            // uriComponentsBuilder.queryParam will receive a Collection.
             if (v instanceof Collection) {
               uriComponentsBuilder.queryParam(k, ((Collection<?>) v).toArray());
             } else {
@@ -87,7 +82,19 @@ public abstract class Service {
             }
           });
     }
-    return uriComponentsBuilder.build();
+    return uriComponentsBuilder;
+  }
+
+  public final URI getUri() {
+    return getUri(null);
+  }
+
+  public final URI getUri(final String endpointName) {
+    return getUri(endpointName, null);
+  }
+
+  public final URI getUri(final String endpointName, final Map<String, ?> uriVariables) {
+    return getUri(endpointName, uriVariables, null);
   }
 
   public final String getUriString() {
