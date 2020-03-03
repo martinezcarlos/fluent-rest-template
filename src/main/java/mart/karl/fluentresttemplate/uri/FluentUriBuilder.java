@@ -18,7 +18,6 @@
 package mart.karl.fluentresttemplate.uri;
 
 import mart.karl.fluentresttemplate.executor.Executor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MultiValueMap;
 
@@ -33,13 +32,11 @@ public interface FluentUriBuilder {
 
   FluentUriBuilder queryParams(Map<String, ?> params);
 
-  FluentUriBuilder queryParams(MultiValueMap<String, String> params);
+  FluentUriBuilder queryParams(@Nullable MultiValueMap<String, String> params);
 
   FluentUriBuilder uriVariable(String name, Object value);
 
   FluentUriBuilder uriVariables(Map<String, ?> variables);
-
-  FluentUriBuilder withHeaders(final HttpHeaders headers);
 
   Executor executor();
 }

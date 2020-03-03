@@ -15,24 +15,28 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate.executor;
+package mart.karl.fluentresttemplate;
 
+import mart.karl.fluentresttemplate.executor.Executor;
 import mart.karl.fluentresttemplate.uri.FluentUriBuilder;
 import mart.karl.fluentresttemplate.uri.UriBodyStarter;
 import mart.karl.fluentresttemplate.uri.UriStarter;
 import mart.karl.fluentresttemplate.uri.service.Service;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.lang.Nullable;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 final class FluentRestTemplateManager<T>
     implements UriStarter, UriBodyStarter, FluentUriBuilder, Executor {
@@ -44,8 +48,6 @@ final class FluentRestTemplateManager<T>
   private final Map<String, Object> uriVariables = new HashMap<>();
   private UriComponentsBuilder uriComponentsBuilder;
   private RequestEntity.BodyBuilder requestEntityBuilder;
-  private HttpHeaders headers;
-  ///////
   private Service service;
   private String serviceEndpointName;
 
@@ -107,7 +109,7 @@ final class FluentRestTemplateManager<T>
   }
 
   @Override
-  public FluentUriBuilder queryParams(final Map<String, ?> params) {
+  public FluentUriBuilder queryParams(@Nullable final Map<String, ?> params) {
     if (!CollectionUtils.isEmpty(params)) {
       params.forEach(uriComponentsBuilder::queryParam);
     }
@@ -127,16 +129,10 @@ final class FluentRestTemplateManager<T>
   }
 
   @Override
-  public FluentUriBuilder uriVariables(final Map<String, ?> variables) {
+  public FluentUriBuilder uriVariables(@Nullable final Map<String, ?> variables) {
     if (!CollectionUtils.isEmpty(variables)) {
       uriVariables.putAll(variables);
     }
-    return this;
-  }
-
-  @Override
-  public FluentUriBuilder withHeaders(final HttpHeaders headers) {
-    this.headers = headers;
     return this;
   }
 
@@ -147,8 +143,44 @@ final class FluentRestTemplateManager<T>
   }
 
   @Override
+  public Executor header(final String name, final String... values) {
+    requestEntityBuilder.header(name, values);
+    return this;
+  }
+
+  @Override
+  public Executor headers(final HttpHeaders headers) {
+    requestEntityBuilder.headers(headers);
+    return this;
+  }
+
+  @Override
+  public Executor headers(final Consumer<HttpHeaders> consumer) {
+    requestEntityBuilder.headers(consumer);
+    return this;
+  }
+
+  @Override
+  public Executor accept(final MediaType... types) {
+    requestEntityBuilder.accept(types);
+    return this;
+  }
+
+  @Override
+  public Executor acceptCharset(final Charset... charsets) {
+    requestEntityBuilder.acceptCharset(charsets);
+    return this;
+  }
+
+  @Override
   public ResponseEntity<Void> execute() {
-    return processExecution(new ParameterizedTypeReference<Void>() {});
+    return processExecution(new ParameterizedTypeReference<Void>() {
+    });
+  }
+
+  @Override
+  public <O> ResponseEntity<O> execute(final Class<O> responseClass) {
+    return restTemplate.exchange(requestEntityBuilder.body(body), responseClass);
   }
 
   @Override
@@ -158,8 +190,7 @@ final class FluentRestTemplateManager<T>
 
   private <O> ResponseEntity<O> processExecution(
       final ParameterizedTypeReference<O> typeReference) {
-    final HttpEntity<?> entity = new HttpEntity<>(body, headers);
-    return restTemplate.exchange(buildUri(), httpMethod, entity, typeReference);
+    return restTemplate.exchange(requestEntityBuilder.body(body), typeReference);
   }
 
   private URI buildUri() {
