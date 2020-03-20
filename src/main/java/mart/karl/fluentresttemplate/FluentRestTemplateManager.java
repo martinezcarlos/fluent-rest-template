@@ -17,24 +17,27 @@
 
 package mart.karl.fluentresttemplate;
 
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import mart.karl.fluentresttemplate.executor.Executor;
 import mart.karl.fluentresttemplate.uri.FluentUriBuilder;
 import mart.karl.fluentresttemplate.uri.UriBodyStarter;
 import mart.karl.fluentresttemplate.uri.UriStarter;
 import mart.karl.fluentresttemplate.uri.service.Service;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 final class FluentRestTemplateManager<T>
     implements UriStarter, UriBodyStarter, FluentUriBuilder, Executor {
@@ -46,10 +49,8 @@ final class FluentRestTemplateManager<T>
   private final Map<String, Object> uriVariables = new HashMap<>();
   private UriComponentsBuilder uriComponentsBuilder;
   private RequestEntity.BodyBuilder requestEntityBuilder;
-  //  private Service service;
-  //  private String serviceEndpointName;
 
-  public FluentRestTemplateManager(
+  FluentRestTemplateManager(
       final RestTemplate restTemplate, final HttpMethod httpMethod, final T body) {
     this.restTemplate = restTemplate;
     this.httpMethod = httpMethod;
@@ -113,7 +114,7 @@ final class FluentRestTemplateManager<T>
     if (!CollectionUtils.isEmpty(values)) {
       uriComponentsBuilder.queryParam(name, values.toArray());
     }
-    // Activate when in Spring Boot version 2.2.5.RELEASE or older.
+    // Activate when in Spring Boot version 2.2.5.RELEASE or higher.
     // uriComponentsBuilder.queryParam(name, values);
     return this;
   }
@@ -152,19 +153,13 @@ final class FluentRestTemplateManager<T>
     return this;
   }
 
-  @Override
-  public Executor header(final String name, final String... values) {
-    requestEntityBuilder.header(name, values);
-    return this;
+  private URI buildUri() {
+    return uriComponentsBuilder.buildAndExpand(uriVariables).toUri();
   }
 
   @Override
-  public Executor headers(final HttpHeaders headers) {
-    if (headers != null) {
-      headers.forEach((k, v) -> requestEntityBuilder.header(k, v.toArray(new String[]{})));
-    }
-    // Activate this block when in Spring Boot version 2.2.5.RELEASE or older
-    // requestEntityBuilder.headers(headers);
+  public Executor header(final String name, final String... values) {
+    requestEntityBuilder.header(name, values);
     return this;
   }
 
@@ -174,6 +169,16 @@ final class FluentRestTemplateManager<T>
   //    requestEntityBuilder.headers(consumer);
   //    return this;
   //  }
+
+  @Override
+  public Executor headers(final HttpHeaders headers) {
+    if (headers != null) {
+      headers.forEach((k, v) -> requestEntityBuilder.header(k, v.toArray(new String[] {})));
+    }
+    // Activate this block when in Spring Boot version 2.2.5.RELEASE or older
+    // requestEntityBuilder.headers(headers);
+    return this;
+  }
 
   @Override
   public Executor accept(final MediaType... types) {
@@ -189,8 +194,7 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public ResponseEntity<Void> execute() {
-    return processExecution(new ParameterizedTypeReference<Void>() {
-    });
+    return processExecution(new ParameterizedTypeReference<Void>() {});
   }
 
   @Override
@@ -207,19 +211,4 @@ final class FluentRestTemplateManager<T>
       final ParameterizedTypeReference<O> typeReference) {
     return restTemplate.exchange(requestEntityBuilder.body(body), typeReference);
   }
-
-  private URI buildUri() {
-    return uriComponentsBuilder.buildAndExpand(uriVariables).toUri();
-    //    return Optional.ofNullable(service)
-    //        .map(this::buildUriFromService)
-    //        .orElseGet(this::buildUriFromComponentsBuilder);
-  }
-
-  //  private URI buildUriFromService(final Service service) {
-  //    return service.getUri(serviceEndpointName, uriVariables);
-  //  }
-  //
-  //  private URI buildUriFromComponentsBuilder() {
-  //    return uriComponentsBuilder.buildAndExpand(uriVariables).toUri();
-  //  }
 }
