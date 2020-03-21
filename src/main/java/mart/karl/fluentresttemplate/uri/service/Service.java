@@ -17,17 +17,22 @@
 
 package mart.karl.fluentresttemplate.uri.service;
 
+import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.ToString;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.*;
-
 @Setter
-@SuperBuilder
+@ToString
+@EqualsAndHashCode
 public abstract class Service {
   private String scheme;
   private String host;
