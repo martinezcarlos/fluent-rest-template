@@ -17,12 +17,11 @@
 
 package mart.karl.fluentresttemplate;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
-import mart.karl.fluentresttemplate.uri.service.BaseService;
 import mart.karl.fluentresttemplate.uri.service.Service;
-import org.junit.jupiter.api.Disabled;
+import mart.karl.fluentresttemplate.uri.service.ServiceFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,8 +31,11 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -48,14 +50,15 @@ import static org.mockito.Mockito.never;
 @ExtendWith(MockitoExtension.class)
 class FluentRestTemplateTest {
 
-  private static final String DUMMY_URI = "http://dummy.url";
+  private static final String DUMMY_URI = "http://dummy.uri";
+  private static final String DUMMY_URI_WITH_FOO = "http://dummy.uri/foo/{foo}";
   private static final String DUMMY_MESSAGE = "DummyMessage";
   private static final String TEST_STRING = "Test String";
   private static final String DUMMY_RESPONSE = "DummyResponse";
-  private static final String FOO = "Foo";
-  private static final String BAR = "Bar";
-  private static final String BAZ = "Baz";
-  private static final ParameterizedTypeReference<String> STRING_TYPE_REFERENCE =
+  private static final String FOO = "foo";
+  private static final String BAR = "bar";
+  private static final String BAZ = "baz";
+  private static final ParameterizedTypeReference<String> TYPE_REFERENCE =
       new ParameterizedTypeReference<String>() {};
 
   @Mock private RestTemplate restTemplate;
@@ -88,7 +91,7 @@ class FluentRestTemplateTest {
             .get()
             .from(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri())
             .executor()
-            .execute(STRING_TYPE_REFERENCE);
+            .execute(TYPE_REFERENCE);
     // Then
     then(restTemplate)
         .should()
@@ -103,7 +106,7 @@ class FluentRestTemplateTest {
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willThrow(new RestClientException(DUMMY_MESSAGE));
     final Service service =
-        BaseService.from(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri());
+        ServiceFactory.from(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri());
     // When
     // Then
     assertThrows(
@@ -111,7 +114,7 @@ class FluentRestTemplateTest {
         () ->
             fluent
                 .get()
-                .from(service, BaseService.BASE_PATH)
+                .from(service)
                 .executor()
                 .execute(new ParameterizedTypeReference<Integer>() {}));
     then(restTemplate)
@@ -124,18 +127,11 @@ class FluentRestTemplateTest {
     // Given
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
-    final Map<String, Object> queryParams = Collections.singletonMap(FOO, BAR);
     final HttpHeaders headers = new HttpHeaders();
     headers.set(FOO, BAR);
     // When
     final ResponseEntity<String> execute =
-        fluent
-            .post()
-            .into(DUMMY_URI)
-            .queryParams(queryParams)
-            .executor()
-            .headers(headers)
-            .execute(STRING_TYPE_REFERENCE);
+        fluent.post().into(DUMMY_URI).executor().headers(headers).execute(TYPE_REFERENCE);
     // Then
     then(restTemplate)
         .should()
@@ -149,18 +145,15 @@ class FluentRestTemplateTest {
     // Given
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
-    final Map<String, Object> queryParams = Collections.singletonMap(FOO, BAR);
-    final HttpHeaders headers = new HttpHeaders();
-    headers.set(FOO, BAR);
     // When
     final ResponseEntity<String> execute =
         fluent
             .post(TEST_STRING)
             .into(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri())
-            .queryParams(queryParams)
+            .queryParam(FOO, BAR)
             .executor()
-            .headers(headers)
-            .execute(STRING_TYPE_REFERENCE);
+            .header(FOO, BAR)
+            .execute(TYPE_REFERENCE);
     // Then
     then(restTemplate)
         .should()
@@ -175,7 +168,8 @@ class FluentRestTemplateTest {
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willReturn(ResponseEntity.ok().build());
     // When
-    final ResponseEntity<Void> execute = fluent.delete().from(DUMMY_URI).executor().execute();
+    final ResponseEntity<Void> execute =
+        fluent.delete().from(DUMMY_URI_WITH_FOO).uriVariable(FOO, BAR).executor().execute();
     // Then
     then(restTemplate)
         .should()
@@ -185,22 +179,23 @@ class FluentRestTemplateTest {
         .containsExactly(HttpStatus.OK, null);
   }
 
-  @Disabled // TODO: enable this test
   @Test
   void putNoBody() {
     // Given
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
-    final Service service = BaseService.from(DUMMY_URI);
-    final Map<String, Object> queryParams = Collections.singletonMap(FOO, Arrays.asList(BAR, BAZ));
+    final Service service = ServiceFactory.from(DUMMY_URI_WITH_FOO);
+    final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+    queryParams.put(FOO, Arrays.asList(BAR, BAZ));
     // When
     final ResponseEntity<String> execute =
         fluent
             .put()
-            .into(service, BaseService.BASE_PATH)
+            .into(service)
+            .uriVariables(Collections.singletonMap(FOO, BAR))
             .queryParams(queryParams)
             .executor()
-            .execute(STRING_TYPE_REFERENCE);
+            .execute(TYPE_REFERENCE);
     // Then
     then(restTemplate)
         .should()
@@ -212,21 +207,20 @@ class FluentRestTemplateTest {
   @Test
   void putWithBody() {
     // Given
-    given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
+    given(restTemplate.exchange(any(RequestEntity.class), any(Class.class)))
         .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
     // When
-    final Map<String, Object> queryParams = Collections.singletonMap(FOO, Arrays.asList(BAR, BAZ));
     final ResponseEntity<String> execute =
         fluent
             .put(TEST_STRING)
             .into(DUMMY_URI)
-            .queryParams(queryParams)
+            .queryParam(FOO, Arrays.asList(BAR, BAZ))
             .executor()
-            .execute(STRING_TYPE_REFERENCE);
+            .accept(MediaType.APPLICATION_JSON)
+            .acceptCharset(Charset.defaultCharset())
+            .execute(String.class);
     // Then
-    then(restTemplate)
-        .should()
-        .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));
+    then(restTemplate).should().exchange(any(RequestEntity.class), any(Class.class));
     assertThat(execute).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
     assertThat(execute).extracting(HttpEntity::getBody).isNotNull();
   }
@@ -234,12 +228,12 @@ class FluentRestTemplateTest {
   @Test
   void patchNoBody() {
     // Given
-    final Service service = BaseService.from(DUMMY_URI);
+    final Service service = ServiceFactory.from(DUMMY_URI);
     // When
     // Then
     assertThrows(
         UnsupportedOperationException.class,
-        () -> fluent.patch().into(service, BaseService.BASE_PATH).executor().execute());
+        () -> fluent.patch().into(service).executor().execute());
     then(restTemplate)
         .should(never())
         .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));

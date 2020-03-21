@@ -17,22 +17,18 @@
 
 package mart.karl.fluentresttemplate.uri;
 
-import mart.karl.fluentresttemplate.executor.Executor;
-import org.springframework.lang.Nullable;
-import org.springframework.util.MultiValueMap;
-
 import java.util.Collection;
 import java.util.Map;
+import mart.karl.fluentresttemplate.executor.Executor;
+import org.springframework.util.MultiValueMap;
 
 public interface FluentUriBuilder {
 
   FluentUriBuilder queryParam(String name, Object... values);
 
-  FluentUriBuilder queryParam(String name, @Nullable Collection<?> values);
+  FluentUriBuilder queryParam(String name, Collection<?> values);
 
-  FluentUriBuilder queryParams(Map<String, ?> params);
-
-  FluentUriBuilder queryParams(@Nullable MultiValueMap<String, String> params);
+  FluentUriBuilder queryParams(MultiValueMap<String, String> params);
 
   FluentUriBuilder uriVariable(String name, Object value);
 

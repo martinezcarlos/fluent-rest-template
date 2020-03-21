@@ -19,10 +19,8 @@ package mart.karl.fluentresttemplate.uri.service;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.ToString;
@@ -37,7 +35,7 @@ public abstract class Service {
   private String scheme;
   private String host;
   private String port;
-  private String baseContext;
+  private String contextPath;
   private String version;
   private Map<String, String> endpoints;
 
@@ -65,21 +63,29 @@ public abstract class Service {
       final Map<String, ?> uriVariables,
       final Map<String, ?> queryParams) {
     final UriComponentsBuilder uriComponentsBuilder =
+        getUriComponentsBuilder(endpointName, queryParams);
+    return CollectionUtils.isEmpty(uriVariables)
+        ? uriComponentsBuilder.build()
+        : uriComponentsBuilder.buildAndExpand(uriVariables);
+  }
+
+  // TODO: Think about this method's visibility
+  public UriComponentsBuilder getUriComponentsBuilder(
+      final String endpointName, final Map<String, ?> queryParams) {
+    final UriComponentsBuilder uriComponentsBuilder =
         UriComponentsBuilder.newInstance()
             .scheme(scheme)
             .host(host)
             .port(port)
             .pathSegment(
-                baseContext,
+                contextPath,
                 version,
-                Objects.isNull(endpoints) ? null : endpoints.get(endpointName))
-            .uriVariables(
-                Optional.ofNullable(uriVariables)
-                    .map(Collections::<String, Object>unmodifiableMap)
-                    .orElse(Collections.emptyMap()));
+                Objects.isNull(endpoints) ? null : endpoints.get(endpointName));
     if (!CollectionUtils.isEmpty(queryParams)) {
       queryParams.forEach(
           (k, v) -> {
+            // Remove this if block when in Spring version 5.2.0.RELEASE or higher as
+            // uriComponentsBuilder.queryParam will receive a Collection.
             if (v instanceof Collection) {
               uriComponentsBuilder.queryParam(k, ((Collection<?>) v).toArray());
             } else {
@@ -87,7 +93,7 @@ public abstract class Service {
             }
           });
     }
-    return uriComponentsBuilder.build();
+    return uriComponentsBuilder;
   }
 
   public final String getUriString() {
