@@ -21,10 +21,8 @@ import lombok.RequiredArgsConstructor;
 import mart.karl.fluentresttemplate.uri.UriBodyStarter;
 import mart.karl.fluentresttemplate.uri.UriStarter;
 import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-@Component
 @RequiredArgsConstructor
 public final class FluentRestTemplate {
 

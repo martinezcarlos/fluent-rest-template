@@ -17,32 +17,33 @@
 
 package mart.karl.fluentresttemplate.uri.service;
 
-import lombok.experimental.SuperBuilder;
+import java.net.URI;
+import java.util.Collections;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.URI;
-import java.util.Collections;
+@ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
+public final class BaseService extends Service {
 
-@SuperBuilder
-public class BaseService extends Service {
-
-  public static final String UNIQUE_ENDPOINT_NAME = "uniqueEndpoint";
+  public static final String BASE_PATH = "basePath";
 
   public static Service from(final URI uri) {
-    return buildFromComponents(UriComponentsBuilder.fromUri(uri).build());
+    return from(UriComponentsBuilder.fromUri(uri).build());
   }
 
-  private static BaseService buildFromComponents(final UriComponents components) {
-    return BaseService.builder()
-        .scheme(components.getScheme())
-        .host(components.getHost())
-        .port(components.getPort() == -1 ? null : String.valueOf(components.getPort()))
-        .endpoints(Collections.singletonMap(UNIQUE_ENDPOINT_NAME, components.getPath()))
-        .build();
+  private static Service from(final UriComponents components) {
+    final Service baseService = new BaseService();
+    baseService.setScheme(components.getScheme());
+    baseService.setHost(components.getHost());
+    baseService.setPort(components.getPort() == -1 ? null : String.valueOf(components.getPort()));
+    baseService.setEndpoints(Collections.singletonMap(BASE_PATH, components.getPath()));
+    return baseService;
   }
 
   public static Service from(final String uriString) {
-    return buildFromComponents(UriComponentsBuilder.fromUriString(uriString).build());
+    return from(UriComponentsBuilder.fromUriString(uriString).build());
   }
 }
