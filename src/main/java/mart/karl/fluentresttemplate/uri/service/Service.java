@@ -19,10 +19,8 @@ package mart.karl.fluentresttemplate.uri.service;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.ToString;
@@ -37,9 +35,21 @@ public abstract class Service {
   private String scheme;
   private String host;
   private String port;
-  private String baseContext;
+  private String contextPath;
   private String version;
   private Map<String, String> endpoints;
+
+  public final URI getUri() {
+    return getUri(null);
+  }
+
+  public final URI getUri(final String endpointName) {
+    return getUri(endpointName, null);
+  }
+
+  public final URI getUri(final String endpointName, final Map<String, ?> uriVariables) {
+    return getUri(endpointName, uriVariables, null);
+  }
 
   public final URI getUri(
       final String endpointName,
@@ -59,6 +69,7 @@ public abstract class Service {
         : uriComponentsBuilder.buildAndExpand(uriVariables);
   }
 
+  // TODO: Think about this method's visibility
   public UriComponentsBuilder getUriComponentsBuilder(
       final String endpointName, final Map<String, ?> queryParams) {
     final UriComponentsBuilder uriComponentsBuilder =
@@ -67,13 +78,13 @@ public abstract class Service {
             .host(host)
             .port(port)
             .pathSegment(
-                baseContext,
+                contextPath,
                 version,
                 Objects.isNull(endpoints) ? null : endpoints.get(endpointName));
     if (!CollectionUtils.isEmpty(queryParams)) {
       queryParams.forEach(
           (k, v) -> {
-            // Remove this if block when in Spring Boot version 2.2.5.RELEASE or older as
+            // Remove this if block when in Spring version 5.2.0.RELEASE or higher as
             // uriComponentsBuilder.queryParam will receive a Collection.
             if (v instanceof Collection) {
               uriComponentsBuilder.queryParam(k, ((Collection<?>) v).toArray());
@@ -83,18 +94,6 @@ public abstract class Service {
           });
     }
     return uriComponentsBuilder;
-  }
-
-  public final URI getUri() {
-    return getUri(null);
-  }
-
-  public final URI getUri(final String endpointName) {
-    return getUri(endpointName, null);
-  }
-
-  public final URI getUri(final String endpointName, final Map<String, ?> uriVariables) {
-    return getUri(endpointName, uriVariables, null);
   }
 
   public final String getUriString() {

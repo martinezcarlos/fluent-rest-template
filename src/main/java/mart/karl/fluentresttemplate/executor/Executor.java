@@ -17,19 +17,18 @@
 
 package mart.karl.fluentresttemplate.executor;
 
+import java.nio.charset.Charset;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-import java.nio.charset.Charset;
 
 public interface Executor {
   Executor header(String name, String... values);
 
   Executor headers(HttpHeaders headers);
 
-  // Activate this block when in Spring Boot version 2.2.5.RELEASE or older
+  // Activate this block when in Spring version 5.2.0.RELEASE or higher.
   //  Executor headers(Consumer<HttpHeaders> consumer);
 
   Executor accept(MediaType... types);

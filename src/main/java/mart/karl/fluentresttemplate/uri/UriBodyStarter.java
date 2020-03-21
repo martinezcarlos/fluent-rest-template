@@ -17,14 +17,15 @@
 
 package mart.karl.fluentresttemplate.uri;
 
-import mart.karl.fluentresttemplate.uri.service.Service;
-
 import java.net.URI;
+import mart.karl.fluentresttemplate.uri.service.Service;
 
 public interface UriBodyStarter {
   FluentUriBuilder into(final String uriString);
 
   FluentUriBuilder into(final URI uri);
+
+  FluentUriBuilder into(Service service);
 
   FluentUriBuilder into(final Service service, final String serviceEndpointName);
 }

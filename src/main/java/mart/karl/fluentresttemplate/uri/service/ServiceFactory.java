@@ -18,7 +18,6 @@
 package mart.karl.fluentresttemplate.uri.service;
 
 import java.net.URI;
-import java.util.Collections;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.web.util.UriComponents;
@@ -26,20 +25,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public final class BaseService extends Service {
-
-  public static final String BASE_PATH = "basePath";
+public final class ServiceFactory extends Service {
 
   public static Service from(final URI uri) {
     return from(UriComponentsBuilder.fromUri(uri).build());
   }
 
   private static Service from(final UriComponents components) {
-    final Service baseService = new BaseService();
+    final Service baseService = new ServiceFactory();
     baseService.setScheme(components.getScheme());
     baseService.setHost(components.getHost());
     baseService.setPort(components.getPort() == -1 ? null : String.valueOf(components.getPort()));
-    baseService.setEndpoints(Collections.singletonMap(BASE_PATH, components.getPath()));
+    baseService.setContextPath(components.getPath());
     return baseService;
   }
 

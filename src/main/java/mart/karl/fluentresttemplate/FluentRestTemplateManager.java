@@ -33,9 +33,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -70,12 +70,13 @@ final class FluentRestTemplateManager<T>
   }
 
   @Override
+  public FluentUriBuilder from(final Service service) {
+    return from(service, null);
+  }
+
+  @Override
   public FluentUriBuilder from(final Service service, final String serviceEndpointName) {
-    //    this.service = service;
-    //    this.serviceEndpointName = serviceEndpointName;
-    if (service == null || StringUtils.isEmpty(serviceEndpointName)) {
-      throw new IllegalArgumentException("service and/or serviceEndpointName are invalid");
-    }
+    Assert.notNull(service, "Service must not be null");
     uriComponentsBuilder = service.getUriComponentsBuilder(serviceEndpointName, null);
     return this;
   }
@@ -93,12 +94,13 @@ final class FluentRestTemplateManager<T>
   }
 
   @Override
+  public FluentUriBuilder into(final Service service) {
+    return into(service, null);
+  }
+
+  @Override
   public FluentUriBuilder into(final Service service, final String serviceEndpointName) {
-    //    this.service = service;
-    //    this.serviceEndpointName = serviceEndpointName;
-    if (service == null || StringUtils.isEmpty(serviceEndpointName)) {
-      throw new IllegalArgumentException("service and/or serviceEndpointName are invalid");
-    }
+    Assert.notNull(service, "Service must not be null");
     uriComponentsBuilder = service.getUriComponentsBuilder(serviceEndpointName, null);
     return this;
   }
@@ -114,16 +116,8 @@ final class FluentRestTemplateManager<T>
     if (!CollectionUtils.isEmpty(values)) {
       uriComponentsBuilder.queryParam(name, values.toArray());
     }
-    // Activate when in Spring Boot version 2.2.5.RELEASE or higher.
+    // Activate when in Spring version 5.2.0.RELEASE or higher.
     // uriComponentsBuilder.queryParam(name, values);
-    return this;
-  }
-
-  @Override
-  public FluentUriBuilder queryParams(final Map<String, ?> params) {
-    if (!CollectionUtils.isEmpty(params)) {
-      params.forEach(uriComponentsBuilder::queryParam);
-    }
     return this;
   }
 
@@ -149,12 +143,9 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public Executor executor() {
-    requestEntityBuilder = RequestEntity.method(httpMethod, buildUri());
+    final URI uri = uriComponentsBuilder.buildAndExpand(uriVariables).toUri();
+    requestEntityBuilder = RequestEntity.method(httpMethod, uri);
     return this;
-  }
-
-  private URI buildUri() {
-    return uriComponentsBuilder.buildAndExpand(uriVariables).toUri();
   }
 
   @Override
@@ -163,22 +154,22 @@ final class FluentRestTemplateManager<T>
     return this;
   }
 
-  // Activate this block when in Spring Boot version 2.2.5.RELEASE or older
-  //  @Override
-  //  public Executor headers(final Consumer<HttpHeaders> consumer) {
-  //    requestEntityBuilder.headers(consumer);
-  //    return this;
-  //  }
-
   @Override
   public Executor headers(final HttpHeaders headers) {
     if (headers != null) {
       headers.forEach((k, v) -> requestEntityBuilder.header(k, v.toArray(new String[] {})));
     }
-    // Activate this block when in Spring Boot version 2.2.5.RELEASE or older
+    // Activate this block when in Spring version 5.2.0.RELEASE or higher.
     // requestEntityBuilder.headers(headers);
     return this;
   }
+
+  //// Activate this block when in Spring version 5.2.0.RELEASE or higher.
+  // @Override
+  // public Executor headers(final Consumer<HttpHeaders> consumer) {
+  //  requestEntityBuilder.headers(consumer);
+  //  return this;
+  // }
 
   @Override
   public Executor accept(final MediaType... types) {
