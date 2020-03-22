@@ -1,9 +1,14 @@
 version: 2.1
 
 orbs:
-  maven: circleci/maven@0.0.12
+  maven: circleci/maven@1.0.0
+  codecov: codecov/codecov@1.0.5
 
 workflows:
-  maven_test:
+  maven_test_codecov_upload:
     jobs:
-      - maven/test # checkout, build, test, and upload test results
+      - maven/test # checkout, build, test, and upload test results to CircleCi
+      - codecov/upload:
+          file: jacoco.exec
+          requires:
+            - maven/test
