@@ -13,7 +13,7 @@ jobs:
   upload_coverage:
     executor: java_8
     steps:
-      - ckeckout
+      - checkout
       - codecov/upload:
           conf: .codecov/codecov.yml
           file: jacoco.exec
