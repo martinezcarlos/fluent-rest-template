@@ -14,6 +14,10 @@ jobs:
     executor: java_8
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - maven-{{ checksum "pom.xml" }}
+            - maven- # used if checksum fails
       - codecov/upload:
           conf: .codecov/codecov.yml
           file: jacoco.exec
