@@ -14,6 +14,6 @@ workflows:
   maven_test_coverage_upload:
     jobs:
       - maven/test # checkout, build, test, and upload test results to CircleCi
-      - upload_coverage
-        requires:
-          - maven/test
+      - upload_coverage:
+          requires:
+            - maven/test
