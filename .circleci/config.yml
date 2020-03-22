@@ -13,6 +13,10 @@ jobs:
   upload_coverage:
     executor: java_8
     steps:
+      - restore_cache:
+          keys:
+            - maven-{{ checksum "pom.xml" }}
+            - maven- # used if checksum fails
       - codecov/upload:
           conf: .codecov/codecov.yml
           file: jacoco.exec
@@ -20,7 +24,8 @@ jobs:
 workflows:
   maven_test_coverage_upload:
     jobs:
-      - maven/test # checkout, build, test, and upload test results to CircleCi
+      - maven/test: # checkout, build, test, and upload test results to CircleCi
+          with_cache
       - upload_coverage:
           requires:
             - maven/test
