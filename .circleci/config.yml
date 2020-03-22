@@ -14,6 +14,9 @@ jobs:
     executor: java_8
     steps:
       - checkout
+      - run:
+          name: Generate 'maven/test' Cache Checksum
+          command: find . -name 'pom.xml' | sort | xargs cat > /tmp/maven_cache_seed
       - restore_cache:
           keys:
             - maven-{{ checksum "/tmp/maven_cache_seed" }}
