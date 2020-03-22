@@ -1,0 +1,25 @@
+version: 2.1
+
+orbs:
+  maven: circleci/maven@1.0.0
+  codecov: codecov/codecov@1.0.5
+
+executors:
+  java_8:
+    docker:
+      - image: circleci/openjdk:8u242-jdk
+
+jobs:
+  upload_coverage:
+    executor: java_8
+    steps:
+      - codecov/upload:
+          file: jacoco.exec
+
+workflows:
+  maven_test_coverage_upload:
+    jobs:
+      - maven/test # checkout, build, test, and upload test results to CircleCi
+      - upload_coverage:
+          requires:
+            - maven/test
