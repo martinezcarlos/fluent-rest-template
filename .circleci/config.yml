@@ -14,6 +14,7 @@ jobs:
     executor: java_8
     steps:
       - codecov/upload:
+          conf: .codecov/codecov.yml
           file: jacoco.exec
 
 workflows:
