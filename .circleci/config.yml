@@ -4,8 +4,14 @@ orbs:
   maven: circleci/maven@1.0.0
   codecov: codecov/codecov@1.0.5
 
+executors:
+  java_8:
+    docker:
+      - image: circleci/openjdk:8u242-jdk
+
 jobs:
   upload_coverage:
+    executor: java_8
     steps:
       - codecov/upload:
           file: jacoco.exec
