@@ -14,10 +14,10 @@ jobs:
     executor: java_8
     steps:
       - checkout
+      - find . -name 'pom.xml' | sort | xargs cat > /tmp/maven_cache_seed
       - restore_cache:
           keys:
-            - maven-{{ checksum "pom.xml" }}
-            - maven- # used if checksum fails
+            - maven-{{ checksum "/tmp/maven_cache_seed" }}
       - codecov/upload:
           conf: .codecov/codecov.yml
           file: jacoco.exec
