@@ -44,7 +44,7 @@ executors:
 
 jobs:
   run_tests:
-    description: Checkouts, run tests, upload test results to CircleCi and stores coverage data into workspace
+    description: Checkouts, builds, run tests, upload test results to CircleCi and stores coverage data into workspace
     executor: java_8
     steps:
       - checkout
@@ -52,19 +52,18 @@ jobs:
       - run: mvn test
       - store_test_results:
           path: target/surefire-reports
-      - run: mkdir -p workspace
       - persist_to_workspace:
-          root: workspace/coverage
-          paths: ../target/jacoco.exec
+          root: ~/
+          paths: target
   upload_coverage:
     description: upload coverage data to Codecov
     executor: java_8
     steps:
       - attach_workspace:
-          at: /workspace
+          at: ~/
       - codecov/upload:
           conf: .codecov/codecov.yml
-          file: coverage/jacoco.exec
+          file: target/jacoco.exec
 
 workflows:
   build_test_upload:
