@@ -20,12 +20,12 @@ commands:
     description: Loads maven dependencies cache
     steps:
       - restore_cache:
-          key: v1-frt-{{ checksum "pom.xml" }}
+          key: frt-{{ checksum "pom.xml" }}
   save_dependency_cache:
     description: Saves maven dependencies cache
     steps:
       - save_cache:
-          key: v1-frt-{{ checksum "pom.xml" }}
+          key: frt-{{ checksum "pom.xml" }}
           paths:
             - ~/.m2
   cache_dependencies:
