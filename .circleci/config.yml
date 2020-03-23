@@ -1,37 +1,54 @@
 version: 2.1
 
 orbs:
-  maven: circleci/maven@1.0.0
+  #maven: circleci/maven@1.0.0
   codecov: codecov/codecov@1.0.5
+
+parameters:
+
 
 executors:
   java_8:
     docker:
       - image: circleci/openjdk:8u242-jdk
-    working_directory: /tmp
 
 jobs:
-  maven_test:
-
-  upload_coverage:
+  prepare_cache:
+    description: Checkout, build and prepare cache
     executor: java_8
     steps:
-      - attach_workspace:
-          at: /coverage
       - checkout
+      - restore_cache:
+          key: v1-frt-{{ checksum "pom.xml" }}
+      - run: mvn verify -DskipTests
+      - run: mvn dependency:go-offline
+      - save_cache:
+          key: v1-frt-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+  run_tests:
+    description: Run tests
+    executor: java_8
+    steps:
+      - run: mvn verify
+  upload_coverage:
+    description: upload coverage reports to Codecov
+    executor: java_8
+    steps:
       - codecov/upload:
           conf: .codecov/codecov.yml
-          file: /coverage/jacoco.exec
+          file: jacoco.exec
 
 workflows:
-  maven_test_coverage_upload:
+  build_test_and_upload:
     jobs:
-      - maven/test: # checkout, build, test, and upload test results to CircleCi
-          executor: java_8
-          persist_to_workspace:
-            root: /coverage
-            paths:
-              - target/jacoco.exec
+      - prepare_cache
+      - run_tests:
+          requires:
+            - prepare_cache
       - upload_coverage:
           requires:
-            - maven/test
+            - run_tests
+  #maven_test:
+  # jobs:
+  #   - maven/test # checkout, build, test, and upload test results to CircleCi
