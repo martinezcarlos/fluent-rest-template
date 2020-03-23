@@ -53,8 +53,8 @@ jobs:
       - store_test_results:
           path: target/surefire-reports
       - persist_to_workspace:
-          root: ~/
-          paths: project
+          root: ~/project
+          paths: .
   upload_coverage:
     description: upload coverage data to Codecov
     executor: java_8
