@@ -1,25 +1,75 @@
 version: 2.1
 
 orbs:
-  maven: circleci/maven@1.0.0
+  #maven: circleci/maven@1.0.0
   codecov: codecov/codecov@1.0.5
+
+commands:
+  checkout_code:
+    description: downloads and store the source code
+    steps:
+      - checkout
+      - persist_to_workspace:
+          root: /workspace
+          paths: /home/circleci/project
+  restore_code:
+    description: Restores the sorce code from the workspace to the source home
+    steps:
+      - run: cp tmp/workspace/home/circleci/project tmp/home/circleci/project
+  load_dependency_cache:
+    description: Loads maven dependencies cache
+    steps:
+      - restore_cache:
+          key: frt-{{ checksum "pom.xml" }}
+  save_dependency_cache:
+    description: Saves maven dependencies cache
+    steps:
+      - save_cache:
+          key: frt-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+  cache_dependencies:
+    description: Checkout, build and prepare cache
+    steps:
+      - load_dependency_cache
+      - run: mvn verify -DskipTests
+      - run: mvn dependency:go-offline
+      - save_dependency_cache
 
 executors:
   java_8:
     docker:
       - image: circleci/openjdk:8u242-jdk
+    #working_directory: /home
 
 jobs:
-  upload_coverage:
+  run_tests:
+    description: Checkouts, builds, run tests, upload test results to CircleCi and stores coverage data into workspace
     executor: java_8
     steps:
-      - codecov/upload:
-          file: jacoco.exec
+      - checkout
+      - cache_dependencies
+      - run: mvn test
+      - store_test_results:
+          path: target/surefire-reports
+      - persist_to_workspace:
+          root: ~/project
+          paths: .
+  upload_coverage:
+    description: upload coverage data to Codecov
+    executor: java_8
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - codecov/upload
 
 workflows:
-  maven_test_coverage_upload:
+  build_test_upload:
     jobs:
-      - maven/test # checkout, build, test, and upload test results to CircleCi
+      - run_tests
       - upload_coverage:
           requires:
-            - maven/test
+            - run_tests
+  #maven_test:
+  # jobs:
+  #   - maven/test # checkout, build, test, and upload test results to CircleCi
