@@ -53,21 +53,21 @@ jobs:
       - store_test_results:
           path: target/surefire-reports
       - persist_to_workspace:
-          root: ~/project
+          root: ~/
           paths: .
-      - run: ls -l ~/project
+      - run: ls -l ~/
   upload_coverage:
     description: upload coverage data to Codecov
     executor: java_8
     steps:
       - attach_workspace:
-          at: ~/project
+          at: ~/
       - run: ls -l ~/project
       - run: ls -l ~/.codecov
       - run: ls -l ~/target
       - codecov/upload:
           conf: .codecov/codecov.yml
-          file: target/jacoco.exec
+          file: /project/target/jacoco.exec
 
 workflows:
   build_test_upload:
