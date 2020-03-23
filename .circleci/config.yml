@@ -57,15 +57,15 @@ jobs:
           paths:
             - .
             - .codecov
-      - run: ls -l ~/project
+      - run: ls -a ~/project
   upload_coverage:
     description: upload coverage data to Codecov
     executor: java_8
     steps:
       - attach_workspace:
           at: ~/project
-      - run: ls -l .codecov
-      - run: ls -l target
+      - run: ls -a .codecov
+      - run: ls -a target
       - codecov/upload:
           conf: .codecov/codecov.yml
           file: target/jacoco.exec
