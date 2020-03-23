@@ -5,19 +5,32 @@ orbs:
   codecov: codecov/codecov@1.0.5
 
 parameters:
+  CLONED_SOURCE_FOLDER: /home/circleci/project
 
 
 executors:
   java_8:
     docker:
       - image: circleci/openjdk:8u242-jdk
+    working_directory: /tmp
 
 jobs:
-  prepare_cache:
-    description: Checkout, build and prepare cache
+  checkout_code:
+    description: downloads and store the source code
     executor: java_8
     steps:
       - checkout
+      - persist_to_workspace:
+          root: /workspace
+          paths: /home/circleci/project
+  cache_dependencies:
+    description: Checkout, build and prepare cache
+    executor: java_8
+    steps:
+      #      - checkout
+      - attach_workspace:
+          at: /workspace
+      - run: cp tmp/workspace/home/circleci/project home/circleci/project
       - restore_cache:
           key: v1-frt-{{ checksum "pom.xml" }}
       - run: mvn verify -DskipTests
@@ -27,25 +40,36 @@ jobs:
           paths:
             - ~/.m2
   run_tests:
-    description: Run tests
+    description: Run tests and stores coverage data into workspacee
     executor: java_8
     steps:
+      - attach_workspace:
+          at: /workspace
+      - run: cp tmp/workspace/home/circleci/project home/circleci/project
+      - restore_cache:
+          key: v1-frt-{{ checksum "pom.xml" }}
       - run: mvn verify
+      - run: cp target/jacoco.exec workspace/coverage
   upload_coverage:
     description: upload coverage reports to Codecov
     executor: java_8
     steps:
+      - attach_workspace:
+          at: /workspace
       - codecov/upload:
           conf: .codecov/codecov.yml
-          file: jacoco.exec
+          file: coverage/jacoco.exec
 
 workflows:
-  build_test_and_upload:
+  build_test_upload:
     jobs:
-      - prepare_cache
+      - checkout_code
+      - cache_dependencies:
+          requires:
+            - checkout_code
       - run_tests:
           requires:
-            - prepare_cache
+            - cache_dependencies
       - upload_coverage:
           requires:
             - run_tests
