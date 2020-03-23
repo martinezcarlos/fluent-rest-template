@@ -17,17 +17,21 @@ jobs:
       - run:
           name: Generate 'maven/test' Cache Checksum
           command: find . -name 'pom.xml' | sort | xargs cat > /tmp/maven_cache_seed
-      - restore_cache:
-          keys:
-            - maven-{{ checksum "/tmp/maven_cache_seed" }}
       - codecov/upload:
           conf: .codecov/codecov.yml
-          file: jacoco.exec
+          file: ~/coverage/jacoco.exec
 
 workflows:
   maven_test_coverage_upload:
     jobs:
-      - maven/test # checkout, build, test, and upload test results to CircleCi
+      - maven/test: # checkout, build, test, and upload test results to CircleCi
+        with_cache:
+          steps:
+            - run:
+                name: Stores JaCoCo data file
+                command: |
+                  mkdir -p ~/coverage/
+                  find . -name 'jacoco.exec' -exec cp {} ~/coverage/ \;
       - upload_coverage:
           requires:
             - maven/test
