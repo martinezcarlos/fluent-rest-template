@@ -47,7 +47,6 @@ jobs:
     description: Checkouts, builds, run tests, upload test results to CircleCi and stores coverage data into workspace
     executor: java_8
     steps:
-      - run: rm -rf .git
       - checkout
       - cache_dependencies
       - run: mvn test
