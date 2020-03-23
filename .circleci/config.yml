@@ -15,7 +15,7 @@ commands:
   restore_code:
     description: Restores the sorce code from the workspace to the source home
     steps:
-      - run: cp tmp/workspace/home/circleci/project home/circleci/project
+      - run: cp tmp/workspace/home/circleci/project tmp/home/circleci/project
   load_dependency_cache:
     description: Loads maven dependencies cache
     steps:
@@ -31,8 +31,6 @@ commands:
   cache_dependencies:
     description: Checkout, build and prepare cache
     steps:
-      - attach_workspace:
-          at: /workspace
       - restore_code
       - load_dependency_cache
       - run: mvn verify -DskipTests
@@ -55,6 +53,7 @@ jobs:
       - restore_code
       - load_dependency_cache
       - run: mvn verify
+      - save_dependency_cache
       - run: cp target/jacoco.exec workspace/coverage
   upload_coverage:
     description: upload coverage data to Codecov
