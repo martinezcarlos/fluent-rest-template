@@ -57,8 +57,7 @@ jobs:
           paths:
             - .
             - .codecov
-      - run: ls -l ~/
-      - run: ls -l root
+      - run: ls -l ~/project
   upload_coverage:
     description: upload coverage data to Codecov
     executor: java_8
