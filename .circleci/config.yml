@@ -40,7 +40,7 @@ executors:
   java_8:
     docker:
       - image: circleci/openjdk:8u242-jdk
-    working_directory: /workspace
+    working_directory: /home
 
 jobs:
   run_tests:
@@ -53,20 +53,20 @@ jobs:
       - store_test_results:
           path: target/surefire-reports
       - persist_to_workspace:
-          root: workspace
+          root: home
           paths: .
-      - run: ls -l workspace
+      - run: ls -l home
   upload_coverage:
     description: upload coverage data to Codecov
     executor: java_8
     steps:
       - attach_workspace:
-          at: workspace
-      - run: ls -l workspace/project
-      - run: ls -l workspace/.codecov
-      - run: ls -l workspace/target
+          at: home
+      - run: ls -l home/project
+      - run: ls -l home/.codecov
+      - run: ls -l home/target
       - codecov/upload:
-          conf: workspace/.codecov/codecov.yml
+          conf: home/.codecov/codecov.yml
           file: ~/project/target/jacoco.exec
 
 workflows:
