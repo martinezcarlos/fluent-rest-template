@@ -1,18 +1,20 @@
 /*
- * Copyright (c) 2020 Karl Mart
- * Carlos Martinez, ingcarlosmartinez@icloud.com
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  * Copyright (c) 2020 Karl Mart
+ *  * Carlos Martinez, ingcarlosmartinez@icloud.com
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *    http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package mart.karl.fluentresttemplate;
@@ -22,19 +24,20 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import mart.karl.fluentresttemplate.executor.Executor;
 import mart.karl.fluentresttemplate.uri.FluentUriBuilder;
 import mart.karl.fluentresttemplate.uri.UriBodyStarter;
 import mart.karl.fluentresttemplate.uri.UriStarter;
 import mart.karl.fluentresttemplate.uri.service.Service;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -113,9 +116,7 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public FluentUriBuilder queryParam(final String name, final Collection<?> values) {
-    if (!CollectionUtils.isEmpty(values)) {
-      uriComponentsBuilder.queryParam(name, values.toArray());
-    }
+    Optional.ofNullable(values).ifPresent(v -> uriComponentsBuilder.queryParam(name, v.toArray()));
     // Activate when in Spring version 5.2.0.RELEASE or higher.
     // uriComponentsBuilder.queryParam(name, values);
     return this;
@@ -135,9 +136,7 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public FluentUriBuilder uriVariables(final Map<String, ?> variables) {
-    if (!CollectionUtils.isEmpty(variables)) {
-      uriVariables.putAll(variables);
-    }
+    Optional.ofNullable(variables).ifPresent(uriVariables::putAll);
     return this;
   }
 
@@ -156,9 +155,9 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public Executor headers(final HttpHeaders headers) {
-    if (headers != null) {
-      headers.forEach((k, v) -> requestEntityBuilder.header(k, v.toArray(new String[] {})));
-    }
+    Optional.ofNullable(headers)
+        .ifPresent(
+            hs -> hs.forEach((k, v) -> requestEntityBuilder.header(k, v.toArray(new String[] {}))));
     // Activate this block when in Spring version 5.2.0.RELEASE or higher.
     // requestEntityBuilder.headers(headers);
     return this;
@@ -196,6 +195,21 @@ final class FluentRestTemplateManager<T>
   @Override
   public <O> ResponseEntity<O> execute(final ParameterizedTypeReference<O> typeReference) {
     return processExecution(typeReference);
+  }
+
+  @Override
+  public void executeForObject() {
+    Optional.ofNullable(execute()).orElse(null);
+  }
+
+  @Override
+  public <O> O executeForObject(final Class<O> responseClass) {
+    return Optional.ofNullable(execute(responseClass)).map(HttpEntity::getBody).orElse(null);
+  }
+
+  @Override
+  public <O> O executeForObject(final ParameterizedTypeReference<O> typeReference) {
+    return Optional.ofNullable(execute(typeReference)).map(HttpEntity::getBody).orElse(null);
   }
 
   private <O> ResponseEntity<O> processExecution(
