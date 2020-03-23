@@ -68,6 +68,7 @@ jobs:
 workflows:
   build_test_upload:
     jobs:
+      - checkout_code
       - run_tests
       - upload_coverage:
           requires:
