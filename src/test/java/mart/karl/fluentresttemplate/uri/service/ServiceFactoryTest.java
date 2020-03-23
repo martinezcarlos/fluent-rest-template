@@ -1,18 +1,20 @@
 /*
- * Copyright (c) 2020 Karl Mart
- * Carlos Martinez, ingcarlosmartinez@icloud.com
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  * Copyright (c) 2020 Karl Mart
+ *  * Carlos Martinez, ingcarlosmartinez@icloud.com
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *    http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package mart.karl.fluentresttemplate.uri.service;
@@ -33,6 +35,7 @@ class ServiceFactoryTest {
 
   private static final String DUMMY_URI = "http://dummy.uri";
   private static final String DUMMY_URI_WITH_FOO = "http://dummy.uri/foo/{foo}";
+  private static final String DUMMY_URI_WITH_PORT = "http://dummy.uri:1234";
   private static final String FOO = "foo";
   private static final String BAR = "bar";
   private static final String BAZ = "baz";
@@ -117,7 +120,7 @@ class ServiceFactoryTest {
   void testUriComponentsBuilderMultiValue() {
     // Given
     final Condition<MultiValueMap> condition = new Condition<>();
-    final Service service = ServiceFactory.from(DUMMY_URI);
+    final Service service = ServiceFactory.from(DUMMY_URI_WITH_PORT);
     // When
     final UriComponents components =
         service
@@ -135,6 +138,18 @@ class ServiceFactoryTest {
     final Service service = ServiceFactory.from(DUMMY_URI_WITH_FOO);
     // When
     final String uriString = service.getUriString(null, uriVariables, null);
+    // Then
+    then(uriString).contains(BAR);
+  }
+
+  @Test
+  void buildUriWithEndpoint() {
+    // Given
+    final Map<String, String> uriVariables = Collections.singletonMap(FOO, BAR);
+    final Service service = ServiceFactory.from(DUMMY_URI);
+    service.setEndpoints(Collections.singletonMap(FOO, BAR));
+    // When
+    final String uriString = service.getUriString(FOO, uriVariables, null);
     // Then
     then(uriString).contains(BAR);
   }
