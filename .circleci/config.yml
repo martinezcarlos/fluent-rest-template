@@ -4,9 +4,40 @@ orbs:
   #maven: circleci/maven@1.0.0
   codecov: codecov/codecov@1.0.5
 
-parameters:
-  CLONED_SOURCE_FOLDER: /home/circleci/project
-
+commands:
+  checkout_code:
+    description: downloads and store the source code
+    steps:
+      - checkout
+      - persist_to_workspace:
+          root: /workspace
+          paths: /home/circleci/project
+  restore_code:
+    description: Restores the sorce code from the workspace to the source home
+    steps:
+      - run: cp tmp/workspace/home/circleci/project home/circleci/project
+  load_dependency_cache:
+    description: Loads maven dependencies cache
+    steps:
+      - restore_cache:
+          key: v1-frt-{{ checksum "pom.xml" }}
+  save_dependency_cache:
+    description: Saves maven dependencies cache
+    steps:
+      - save_cache:
+          key: v1-frt-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+  cache_dependencies:
+    description: Checkout, build and prepare cache
+    steps:
+      - attach_workspace:
+          at: /workspace
+      - restore_code
+      - load_dependency_cache
+      - run: mvn verify -DskipTests
+      - run: mvn dependency:go-offline
+      - save_dependency_cache
 
 executors:
   java_8:
@@ -15,43 +46,18 @@ executors:
     working_directory: /tmp
 
 jobs:
-  checkout_code:
-    description: downloads and store the source code
-    executor: java_8
-    steps:
-      - checkout
-      - persist_to_workspace:
-          root: /workspace
-          paths: /home/circleci/project
-  cache_dependencies:
-    description: Checkout, build and prepare cache
-    executor: java_8
-    steps:
-      #      - checkout
-      - attach_workspace:
-          at: /workspace
-      - run: cp tmp/workspace/home/circleci/project home/circleci/project
-      - restore_cache:
-          key: v1-frt-{{ checksum "pom.xml" }}
-      - run: mvn verify -DskipTests
-      - run: mvn dependency:go-offline
-      - save_cache:
-          key: v1-frt-{{ checksum "pom.xml" }}
-          paths:
-            - ~/.m2
   run_tests:
     description: Run tests and stores coverage data into workspacee
     executor: java_8
     steps:
       - attach_workspace:
           at: /workspace
-      - run: cp tmp/workspace/home/circleci/project home/circleci/project
-      - restore_cache:
-          key: v1-frt-{{ checksum "pom.xml" }}
+      - restore_code
+      - load_dependency_cache
       - run: mvn verify
       - run: cp target/jacoco.exec workspace/coverage
   upload_coverage:
-    description: upload coverage reports to Codecov
+    description: upload coverage data to Codecov
     executor: java_8
     steps:
       - attach_workspace:
@@ -63,13 +69,7 @@ jobs:
 workflows:
   build_test_upload:
     jobs:
-      - checkout_code
-      - cache_dependencies:
-          requires:
-            - checkout_code
-      - run_tests:
-          requires:
-            - cache_dependencies
+      - run_tests
       - upload_coverage:
           requires:
             - run_tests
