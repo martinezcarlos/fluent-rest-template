@@ -1,18 +1,20 @@
 /*
- * Copyright (c) 2020 Karl Mart
- * Carlos Martinez, ingcarlosmartinez@icloud.com
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ *  * Copyright (c) 2020 Karl Mart
+ *  * Carlos Martinez, ingcarlosmartinez@icloud.com
+ *  *
+ *  * Licensed under the Apache License, Version 2.0 (the "License");
+ *  * you may not use this file except in compliance with the License.
+ *  * You may obtain a copy of the License at
+ *  *
+ *  *    http://www.apache.org/licenses/LICENSE-2.0
+ *  *
+ *  * Unless required by applicable law or agreed to in writing, software
+ *  * distributed under the License is distributed on an "AS IS" BASIS,
+ *  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  * See the License for the specific language governing permissions and
+ *  * limitations under the License.
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
  */
 
 package mart.karl.fluentresttemplate;
@@ -254,6 +256,58 @@ class FluentRestTemplateTest {
                 .execute());
     then(restTemplate)
         .should(never())
+        .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));
+  }
+
+  @Test
+  void putWithBodyForObject() {
+    // Given
+    given(restTemplate.exchange(any(RequestEntity.class), any(Class.class)))
+        .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
+    // When
+    final String execute =
+        fluent
+            .put(TEST_STRING)
+            .into(DUMMY_URI)
+            .queryParam(FOO, Arrays.asList(BAR, BAZ))
+            .executor()
+            .accept(MediaType.APPLICATION_JSON)
+            .acceptCharset(Charset.defaultCharset())
+            .executeForObject(String.class);
+    // Then
+    then(restTemplate).should().exchange(any(RequestEntity.class), any(Class.class));
+    assertThat(execute).isNotNull().isNotEmpty();
+  }
+
+  @Test
+  void getForObject() {
+    // Given
+    given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
+        .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
+    // When
+    final String execute =
+        fluent
+            .get()
+            .from(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri())
+            .executor()
+            .executeForObject(TYPE_REFERENCE);
+    // Then
+    then(restTemplate)
+        .should()
+        .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));
+    assertThat(execute).isNotNull().isNotEmpty();
+  }
+
+  @Test
+  void getVoidForObject() {
+    // Given
+    given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
+        .willReturn(ResponseEntity.ok().build());
+    // When
+    fluent.get().from(DUMMY_URI).executor().executeForObject();
+    // Then
+    then(restTemplate)
+        .should()
         .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));
   }
 }
