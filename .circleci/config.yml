@@ -54,9 +54,7 @@ jobs:
           path: target/surefire-reports
       - persist_to_workspace:
           root: ~/project
-          paths:
-            - .
-            - .codecov
+          paths: .
       - run: ls -a ~/project
   upload_coverage:
     description: upload coverage data to Codecov
