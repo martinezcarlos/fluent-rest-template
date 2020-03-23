@@ -31,7 +31,6 @@ commands:
   cache_dependencies:
     description: Checkout, build and prepare cache
     steps:
-      - restore_code
       - load_dependency_cache
       - run: mvn verify -DskipTests
       - run: mvn dependency:go-offline
@@ -45,16 +44,17 @@ executors:
 
 jobs:
   run_tests:
-    description: Run tests and stores coverage data into workspacee
+    description: Checkouts, run tests, upload test results to CircleCi and stores coverage data into workspace
     executor: java_8
     steps:
-      - attach_workspace:
-          at: /workspace
-      - restore_code
-      - load_dependency_cache
-      - run: mvn verify
-      - save_dependency_cache
-      - run: cp target/jacoco.exec workspace/coverage
+      - checkout
+      - cache_dependencies
+      - run: mvn test
+      - store_test_results:
+          path: target/surefire-reports
+      - persist_to_workspace:
+          root: /workspace/coverage
+          paths: target/jacoco.exec
   upload_coverage:
     description: upload coverage data to Codecov
     executor: java_8
@@ -68,7 +68,6 @@ jobs:
 workflows:
   build_test_upload:
     jobs:
-      - checkout_code
       - run_tests
       - upload_coverage:
           requires:
