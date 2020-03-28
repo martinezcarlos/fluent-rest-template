@@ -25,7 +25,7 @@
 
   <groupId>mart.karl</groupId>
   <artifactId>fluent-rest-template</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>${revision}</version>
 
   <name>fluent-rest-template</name>
   <description>Fluent Builder Pattern applied to common boilerplate code around RestTemplate
@@ -33,16 +33,27 @@
   <url>https://github.com/martinezcarlos/fluent-rest-template</url>
 
   <properties>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
+    <!-- Project specific -->
+    <revision>0.0.1-SNAPSHOT</revision>
+    <java.version>1.8</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!-- Lowest release to support RestTemplate and RequestEntity -->
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <!-- Maven plugins -->
+    <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+    <maven-site-plugin.version>3.8.2</maven-site-plugin.version>
+    <maven.version.range>[3.5,)</maven.version.range>
+    <java.version.range>[${java.version},)</java.version.range>
+    <!-- Core dependencies -->
+    <!-- Lowest spring-web release to support RestTemplate and RequestEntity -->
     <spring-web.version>4.1.0.RELEASE</spring-web.version>
     <lombok.version>1.18.12</lombok.version>
+    <!-- Testing and metrics -->
     <junit-jupiter-api.version>5.6.0</junit-jupiter-api.version>
     <mockito-junit-jupiter.version>3.3.3</mockito-junit-jupiter.version>
     <assertj-core.version>3.15.0</assertj-core.version>
-    <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.minimum-covered-ratio>0.80</jacoco-maven-plugin.minimum-covered-ratio>
   </properties>
@@ -82,12 +93,40 @@
   </dependencies>
 
   <build>
-    <finalName>maven-unit-test</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${maven-site-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven-enforcer-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-env-requirements</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>${java.version.range}</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>${maven.version.range}</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
