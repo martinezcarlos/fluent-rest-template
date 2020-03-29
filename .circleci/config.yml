@@ -72,6 +72,7 @@ jobs:
       - attach_workspace:
           at: ~/project
       - load_dependency_cache
+      - run: mvn dependency:go-offline
       - run: mvn test
       - store_test_results:
           path: target/surefire-reports
