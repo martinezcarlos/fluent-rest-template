@@ -94,7 +94,7 @@ jobs:
           at: ~/project
       - load_dependency_cache
       - set_git_credentials
-      -run: mvn deploy -s .circleci/settings.xml -P packagecloud
+      - run: mvn deploy -s .circleci/settings.xml
   make_release:
     description: Deploys generated RELEASE JAR to CircleCI
     executor: java_8
@@ -103,7 +103,7 @@ jobs:
           at: ~/project
       - load_dependency_cache
       - set_git_credentials
-      -run: mvn --batch-mode release:prepare release:perform -s .circleci/settings.xml
+      - run: mvn --batch-mode release:prepare release:perform -s .circleci/settings.xml
 
 workflows:
   build_test_deploy:
