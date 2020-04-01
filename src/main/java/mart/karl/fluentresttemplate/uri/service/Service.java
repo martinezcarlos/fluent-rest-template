@@ -85,10 +85,8 @@ public abstract class Service {
     if (!CollectionUtils.isEmpty(queryParams)) {
       queryParams.forEach(
           (k, v) -> {
-            // Remove this if block when in Spring version 5.2.0.RELEASE or higher as
-            // uriComponentsBuilder.queryParam will receive a Collection.
             if (v instanceof Collection) {
-              uriComponentsBuilder.queryParam(k, ((Collection<?>) v).toArray());
+              uriComponentsBuilder.queryParam(k, (Collection<?>) v);
             } else {
               uriComponentsBuilder.queryParam(k, v);
             }

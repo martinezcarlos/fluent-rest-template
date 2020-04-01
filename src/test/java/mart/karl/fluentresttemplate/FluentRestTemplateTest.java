@@ -20,12 +20,14 @@ package mart.karl.fluentresttemplate;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.Consumer;
 import mart.karl.fluentresttemplate.uri.service.Service;
 import mart.karl.fluentresttemplate.uri.service.ServiceFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -34,6 +36,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
@@ -141,6 +145,25 @@ class FluentRestTemplateTest {
   }
 
   @Test
+  void postNoBodyHeadersConsumer() {
+    // Given
+    given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
+        .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
+    final HttpHeaders headers = new HttpHeaders();
+    headers.set(FOO, BAR);
+    final Consumer<HttpHeaders> headersConsumer = c -> c.putAll(headers);
+    // When
+    final ResponseEntity<String> execute =
+        fluent.post().into(DUMMY_URI).executor().headers(headersConsumer).execute(TYPE_REFERENCE);
+    // Then
+    then(restTemplate)
+        .should()
+        .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));
+    assertThat(execute).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
+    assertThat(execute).extracting(HttpEntity::getBody).isNotNull();
+  }
+
+  @Test
   void postWithBody() {
     // Given
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
@@ -226,24 +249,51 @@ class FluentRestTemplateTest {
   }
 
   @Test
-  void patchNoBody() {
+  void patchNoBodySimpleClientHttpRequestFactory() {
     // Given
+    final SimpleClientHttpRequestFactory factory =
+        Mockito.mock(SimpleClientHttpRequestFactory.class);
+    given(restTemplate.getRequestFactory()).willReturn(factory);
     final Service service = ServiceFactory.from(DUMMY_URI);
     // When
-    // Then
     assertThrows(
         UnsupportedOperationException.class,
         () -> fluent.patch().into(service).executor().execute());
+    // Then
+    then(restTemplate).should().getRequestFactory();
     then(restTemplate)
         .should(never())
         .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));
   }
 
   @Test
-  void patchWithBody() {
+  void patchNoBodyAnyClientHttpRequestFactory() {
     // Given
+    final ClientHttpRequestFactory factory = Mockito.mock(ClientHttpRequestFactory.class);
+    given(restTemplate.getRequestFactory()).willReturn(factory);
+    final Service service = ServiceFactory.from(DUMMY_URI);
     // When
+    final ResponseEntity<String> execute =
+        fluent
+            .patch()
+            .into(service)
+            .queryParam(FOO, Arrays.asList(BAR, BAZ))
+            .executor()
+            .accept(MediaType.APPLICATION_JSON)
+            .acceptCharset(Charset.defaultCharset())
+            .execute(String.class);
     // Then
+    then(restTemplate).should().getRequestFactory();
+    then(restTemplate).should().exchange(any(RequestEntity.class), any(Class.class));
+  }
+
+  @Test
+  void patchWithBodySimpleClientHttpRequestFactory() {
+    // Given
+    final SimpleClientHttpRequestFactory factory =
+        Mockito.mock(SimpleClientHttpRequestFactory.class);
+    given(restTemplate.getRequestFactory()).willReturn(factory);
+    // When
     assertThrows(
         UnsupportedOperationException.class,
         () ->
@@ -252,6 +302,8 @@ class FluentRestTemplateTest {
                 .into(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri())
                 .executor()
                 .execute());
+    // Then
+    then(restTemplate).should().getRequestFactory();
     then(restTemplate)
         .should(never())
         .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));

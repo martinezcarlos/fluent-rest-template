@@ -21,12 +21,14 @@ import lombok.RequiredArgsConstructor;
 import mart.karl.fluentresttemplate.uri.UriBodyStarter;
 import mart.karl.fluentresttemplate.uri.UriStarter;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.web.client.RestTemplate;
 
 @RequiredArgsConstructor
 public final class FluentRestTemplate {
 
-  private final RestTemplate restTemplate;
+  @NonNull private final RestTemplate restTemplate;
 
   public UriStarter get() {
     return new FluentRestTemplateManager<>(restTemplate, HttpMethod.GET, null);
@@ -37,7 +39,7 @@ public final class FluentRestTemplate {
   }
 
   public UriBodyStarter post() {
-    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.POST, null);
+    return post(null);
   }
 
   public <T> UriBodyStarter post(final T body) {
@@ -45,7 +47,7 @@ public final class FluentRestTemplate {
   }
 
   public UriBodyStarter put() {
-    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.PUT, null);
+    return put(null);
   }
 
   public <T> UriBodyStarter put(final T body) {
@@ -53,12 +55,15 @@ public final class FluentRestTemplate {
   }
 
   public UriBodyStarter patch() {
-    throw new UnsupportedOperationException("Patch operation not supported in this version");
-    // https://github.com/spring-projects/spring-framework/issues/19618
+    return patch(null);
   }
 
   public <T> UriBodyStarter patch(final T body) {
-    throw new UnsupportedOperationException("Patch operation not supported in this version");
-    // https://github.com/spring-projects/spring-framework/issues/19618
+    if (restTemplate.getRequestFactory() instanceof SimpleClientHttpRequestFactory) {
+      // https://github.com/spring-projects/spring-framework/issues/19618
+      throw new UnsupportedOperationException(
+          "PATCH method not supported in RestTemplate created using SimpleClientHttpRequestFactory");
+    }
+    return new FluentRestTemplateManager<>(restTemplate, HttpMethod.PATCH, body);
   }
 }

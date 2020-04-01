@@ -18,6 +18,7 @@
 package mart.karl.fluentresttemplate.executor;
 
 import java.nio.charset.Charset;
+import java.util.function.Consumer;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -28,8 +29,7 @@ public interface Executor {
 
   Executor headers(HttpHeaders headers);
 
-  // Activate this block when in Spring version 5.2.0.RELEASE or higher.
-  //  Executor headers(Consumer<HttpHeaders> consumer);
+  Executor headers(Consumer<HttpHeaders> consumer);
 
   Executor accept(MediaType... types);
 

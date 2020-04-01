@@ -117,7 +117,6 @@ class ServiceFactoryTest {
   @Test
   void testUriComponentsBuilderMultiValue() {
     // Given
-    final Condition<MultiValueMap> condition = new Condition<>();
     final Service service = ServiceFactory.from(DUMMY_URI_WITH_PORT);
     // When
     final UriComponents components =

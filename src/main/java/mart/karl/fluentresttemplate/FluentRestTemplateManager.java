@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import mart.karl.fluentresttemplate.executor.Executor;
 import mart.karl.fluentresttemplate.uri.FluentUriBuilder;
 import mart.karl.fluentresttemplate.uri.UriBodyStarter;
@@ -114,9 +115,7 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public FluentUriBuilder queryParam(final String name, final Collection<?> values) {
-    Optional.ofNullable(values).ifPresent(v -> uriComponentsBuilder.queryParam(name, v.toArray()));
-    // Activate when in Spring version 5.2.0.RELEASE or higher.
-    // uriComponentsBuilder.queryParam(name, values);
+    uriComponentsBuilder.queryParam(name, values);
     return this;
   }
 
@@ -153,20 +152,15 @@ final class FluentRestTemplateManager<T>
 
   @Override
   public Executor headers(final HttpHeaders headers) {
-    Optional.ofNullable(headers)
-        .ifPresent(
-            hs -> hs.forEach((k, v) -> requestEntityBuilder.header(k, v.toArray(new String[] {}))));
-    // Activate this block when in Spring version 5.2.0.RELEASE or higher.
-    // requestEntityBuilder.headers(headers);
+    requestEntityBuilder.headers(headers);
     return this;
   }
 
-  //// Activate this block when in Spring version 5.2.0.RELEASE or higher.
-  // @Override
-  // public Executor headers(final Consumer<HttpHeaders> consumer) {
-  //  requestEntityBuilder.headers(consumer);
-  //  return this;
-  // }
+  @Override
+  public Executor headers(final Consumer<HttpHeaders> consumer) {
+    requestEntityBuilder.headers(consumer);
+    return this;
+  }
 
   @Override
   public Executor accept(final MediaType... types) {

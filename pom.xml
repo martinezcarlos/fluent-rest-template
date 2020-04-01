@@ -25,10 +25,11 @@
   <artifactId>fluent-rest-template</artifactId>
   <version>${revision}</version>
 
-  <name>fluent-rest-template</name>
+  <name>Fluent RestTemplate</name>
   <description>Fluent Builder Pattern applied to common boilerplate code around RestTemplate
   </description>
   <url>https://github.com/martinezcarlos/fluent-rest-template</url>
+  <inceptionYear>2020</inceptionYear>
 
   <properties>
     <!-- Project specific -->
@@ -39,25 +40,28 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.scm.id>github</project.scm.id>
+    <!-- Core dependencies -->
+    <spring-web.version>5.2.4.RELEASE</spring-web.version>
+    <lombok.version>1.18.12</lombok.version>
     <!-- Maven plugins -->
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
     <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven-site-plugin.version>3.8.2</maven-site-plugin.version>
     <maven.version.range>[3.5,)</maven.version.range>
-    <java.version.range>[${java.version},)</java.version.range>
+    <java.version.range>[1.8,)</java.version.range>
+    <spring-web.version.range>(,5.2.0.RELEASE)</spring-web.version.range>
     <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
     <jacoco-maven-plugin.minimum-covered-ratio>0.80</jacoco-maven-plugin.minimum-covered-ratio>
     <maven-packagecloud-wagon.version>0.0.6</maven-packagecloud-wagon.version>
-    <!-- Core dependencies -->
-    <!-- Lowest spring-web release to support RestTemplate and RequestEntity -->
-    <spring-web.version>4.1.0.RELEASE</spring-web.version>
-    <lombok.version>1.18.12</lombok.version>
     <!-- Testing and metrics -->
     <junit-jupiter-api.version>5.6.0</junit-jupiter-api.version>
     <mockito-junit-jupiter.version>3.3.3</mockito-junit-jupiter.version>
     <assertj-core.version>3.15.0</assertj-core.version>
   </properties>
+  <!-- Lowest spring-web release to support RestTemplate and RequestEntity 4.1.0.RELEASE -->
+  <!-- Lowest spring-web release to support RestTemplate, RequestEntity
+    ~ and headersConsumer 5.2.0.RELEASE -->
 
   <dependencies>
     <dependency>
@@ -140,6 +144,13 @@
                 <requireMavenVersion>
                   <version>${maven.version.range}</version>
                 </requireMavenVersion>
+                <bannedDependencies>
+                  <searchTransitive>true</searchTransitive>
+                  <excludes>
+                    <exclude>org.springframework:spring-web:${spring-web.version.range}</exclude>
+                  </excludes>
+                  <message>A banned dependency or plugin was found!</message>
+                </bannedDependencies>
               </rules>
             </configuration>
           </execution>
