@@ -21,8 +21,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Consumer;
-import mart.karl.fluentresttemplate.uri.service.Service;
-import mart.karl.fluentresttemplate.uri.service.ServiceFactory;
+import mart.karl.fluentresttemplate.service.FluentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,7 +53,7 @@ import static org.mockito.Mockito.never;
 @ExtendWith(MockitoExtension.class)
 class FluentRestTemplateTest {
 
-  private static final String DUMMY_URI = "http://dummy.uri";
+  private static final String DUMMY_URI = "http://dummy.uri:8080";
   private static final String DUMMY_URI_WITH_FOO = "http://dummy.uri/foo/{foo}";
   private static final String DUMMY_MESSAGE = "DummyMessage";
   private static final String TEST_STRING = "Test String";
@@ -109,8 +108,8 @@ class FluentRestTemplateTest {
     // Given
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willThrow(new RestClientException(DUMMY_MESSAGE));
-    final Service service =
-        ServiceFactory.from(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri());
+    final FluentService service =
+        FluentService.from(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri());
     // When
     // Then
     assertThrows(
@@ -207,7 +206,7 @@ class FluentRestTemplateTest {
     // Given
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
-    final Service service = ServiceFactory.from(DUMMY_URI_WITH_FOO);
+    final FluentService service = FluentService.from(DUMMY_URI_WITH_FOO);
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.put(FOO, Arrays.asList(BAR, BAZ));
     // When
@@ -254,7 +253,7 @@ class FluentRestTemplateTest {
     final SimpleClientHttpRequestFactory factory =
         Mockito.mock(SimpleClientHttpRequestFactory.class);
     given(restTemplate.getRequestFactory()).willReturn(factory);
-    final Service service = ServiceFactory.from(DUMMY_URI);
+    final FluentService service = FluentService.from(DUMMY_URI);
     // When
     assertThrows(
         UnsupportedOperationException.class,
@@ -271,7 +270,7 @@ class FluentRestTemplateTest {
     // Given
     final ClientHttpRequestFactory factory = Mockito.mock(ClientHttpRequestFactory.class);
     given(restTemplate.getRequestFactory()).willReturn(factory);
-    final Service service = ServiceFactory.from(DUMMY_URI);
+    final FluentService service = FluentService.from(DUMMY_URI);
     // When
     final ResponseEntity<String> execute =
         fluent
