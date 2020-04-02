@@ -15,18 +15,10 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate.uri;
+package mart.karl.fluentresttemplate.executor;
 
-import java.net.URI;
-import mart.karl.fluentresttemplate.executor.ExecutorUriBuilder;
-import mart.karl.fluentresttemplate.service.FluentService;
+import mart.karl.fluentresttemplate.uri.FluentUriBuilder;
 
-public interface UriStarter {
-  ExecutorUriBuilder from(final String uriString);
-
-  ExecutorUriBuilder from(final URI uri);
-
-  ExecutorUriBuilder from(FluentService service);
-
-  ExecutorUriBuilder from(final FluentService service, final String serviceEndpointName);
+public interface ExecutorUriBuilder extends FluentUriBuilder<ExecutorUriBuilder> {
+  Executor executor();
 }

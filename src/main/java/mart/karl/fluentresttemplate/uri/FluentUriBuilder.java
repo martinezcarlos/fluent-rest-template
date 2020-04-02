@@ -19,20 +19,17 @@ package mart.karl.fluentresttemplate.uri;
 
 import java.util.Collection;
 import java.util.Map;
-import mart.karl.fluentresttemplate.executor.Executor;
 import org.springframework.util.MultiValueMap;
 
-public interface FluentUriBuilder {
+public interface FluentUriBuilder<T extends FluentUriBuilder<T>> {
 
-  FluentUriBuilder queryParam(String name, Object... values);
+  T queryParam(String name, Object... values);
 
-  FluentUriBuilder queryParam(String name, Collection<?> values);
+  T queryParam(String name, Collection<?> values);
 
-  FluentUriBuilder queryParams(MultiValueMap<String, String> params);
+  T queryParams(MultiValueMap<String, String> params);
 
-  FluentUriBuilder uriVariable(String name, Object value);
+  T uriVariable(String name, Object value);
 
-  FluentUriBuilder uriVariables(Map<String, ?> variables);
-
-  Executor executor();
+  T uriVariables(Map<String, ?> variables);
 }
