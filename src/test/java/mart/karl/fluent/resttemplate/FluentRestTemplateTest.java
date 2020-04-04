@@ -15,13 +15,13 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate;
+package mart.karl.fluent.resttemplate;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Consumer;
-import mart.karl.fluentresttemplate.service.FluentService;
+import mart.karl.fluent.service.FluentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,6 +54,7 @@ import static org.mockito.Mockito.never;
 class FluentRestTemplateTest {
 
   private static final String DUMMY_URI = "http://dummy.uri:8080";
+  private static final String DUMMY_URI_WITH_FRAGMENT = "http://dummy.uri:8080#fragment";
   private static final String DUMMY_URI_WITH_FOO = "http://dummy.uri/foo/{foo}";
   private static final String DUMMY_MESSAGE = "DummyMessage";
   private static final String TEST_STRING = "Test String";
@@ -118,6 +119,7 @@ class FluentRestTemplateTest {
             fluent
                 .get()
                 .from(service)
+                .withoutEndpoint()
                 .executor()
                 .execute(new ParameterizedTypeReference<Integer>() {}));
     then(restTemplate)
@@ -214,6 +216,7 @@ class FluentRestTemplateTest {
         fluent
             .put()
             .into(service)
+            .withoutEndpoint()
             .uriVariables(Collections.singletonMap(FOO, BAR))
             .queryParams(queryParams)
             .executor()
@@ -257,7 +260,7 @@ class FluentRestTemplateTest {
     // When
     assertThrows(
         UnsupportedOperationException.class,
-        () -> fluent.patch().into(service).executor().execute());
+        () -> fluent.patch().into(service).withoutEndpoint().executor().execute());
     // Then
     then(restTemplate).should().getRequestFactory();
     then(restTemplate)
@@ -276,6 +279,7 @@ class FluentRestTemplateTest {
         fluent
             .patch()
             .into(service)
+            .withoutEndpoint()
             .queryParam(FOO, Arrays.asList(BAR, BAZ))
             .executor()
             .accept(MediaType.APPLICATION_JSON)
@@ -354,6 +358,20 @@ class FluentRestTemplateTest {
         .willReturn(ResponseEntity.ok().build());
     // When
     fluent.get().from(DUMMY_URI).executor().executeForObject();
+    // Then
+    then(restTemplate)
+        .should()
+        .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));
+  }
+
+  @Test
+  void givenAFragmentIsGiven_whenExecution_thenExecutionSuccess() {
+    // Given
+    given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
+        .willReturn(ResponseEntity.ok().build());
+    // When
+    final ResponseEntity<Void> out =
+        fluent.get().from(DUMMY_URI_WITH_FRAGMENT).fragment("newFragment").executor().execute();
     // Then
     then(restTemplate)
         .should()
