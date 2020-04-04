@@ -15,10 +15,25 @@
  * limitations under the License.
  */
 
-package mart.karl.fluentresttemplate.executor;
+package mart.karl.fluent.resttemplate;
 
-import mart.karl.fluentresttemplate.uri.FluentUriBuilder;
+import mart.karl.fluent.uri.FluentUriBuilder;
 
+/**
+ * Provides handy methods to prepare the URI parts to be used in the creation of the URI.
+ * ExecutorUriBuilder represents the <i>FluentService URI builder phase</i>. <br>
+ * <br>
+ *
+ * <p>Additionally, provides a way to transition to the <i>FluentRestTemplate executor phase</i> by
+ * means of {@linkplain ExecutorUriBuilder#executor()} method.
+ */
 public interface ExecutorUriBuilder extends FluentUriBuilder<ExecutorUriBuilder> {
+
+  /**
+   * Finishes {@linkplain FluentRestTemplate FluentRestTemplate's} builder phase and starts the
+   * executor phase.
+   *
+   * @return Executor to handle executor phase.
+   */
   Executor executor();
 }

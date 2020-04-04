@@ -31,6 +31,40 @@
   <url>https://github.com/martinezcarlos/fluent-rest-template</url>
   <inceptionYear>2020</inceptionYear>
 
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>karl.mart</id>
+      <name>Carlos Martínez</name>
+      <email>ingcarlosmartinez@icloud.com</email>
+      <url>https://github.com/martinezcarlos</url>
+      <organization>Karl Mart</organization>
+      <roles>
+        <role>Project Architect</role>
+        <role>Principal Developer</role>
+      </roles>
+      <timezone>Europe/Madrid</timezone>
+      <properties>
+        <linkedInUrl>https://www.linkedin.com/in/carlosmartinezm/</linkedInUrl>
+      </properties>
+    </developer>
+  </developers>
+
+  <scm>
+    <developerConnection>scm:git:https://github.com/martinezcarlos/fluent-rest-template.git
+    </developerConnection>
+    <url>https://github.com/martinezcarlos/fluent-rest-template</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>
     <!-- Project specific -->
     <revision>0.0.1-SNAPSHOT</revision>
@@ -46,8 +80,10 @@
     <!-- Maven plugins -->
     <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
     <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
-    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven-site-plugin.version>3.8.2</maven-site-plugin.version>
+    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
     <maven.version.range>[3.5,)</maven.version.range>
     <java.version.range>[1.8,)</java.version.range>
     <spring-web.version.range>(,5.2.0.RELEASE)</spring-web.version.range>
@@ -97,13 +133,6 @@
     </dependency>
   </dependencies>
 
-  <scm>
-    <developerConnection>scm:git:https://github.com/martinezcarlos/fluent-rest-template.git
-    </developerConnection>
-    <url>https://github.com/martinezcarlos/fluent-rest-template</url>
-    <tag>HEAD</tag>
-  </scm>
-
   <build>
     <plugins>
       <plugin>
@@ -125,6 +154,34 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-site-plugin</artifactId>
         <version>${maven-site-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${maven-source-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
