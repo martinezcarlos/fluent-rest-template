@@ -20,7 +20,6 @@ package mart.karl.fluent.resttemplate;
 import java.net.URI;
 import mart.karl.fluent.service.FluentService;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.NonNull;
 
 /**
  * Provides simple methods to initialize a {@linkplain FluentRestTemplate FluentRestTemplate}. <br>
@@ -40,7 +39,7 @@ public interface UriStarter {
    * @param uriString Standard String representation of {@linkplain URI URI}.
    * @return The ExecutorUriBuilder that will handle the <i>FluentRestTemplate builder phase</i>.
    */
-  ExecutorUriBuilder from(@NonNull final String uriString);
+  ExecutorUriBuilder from(final String uriString);
 
   /**
    * Starts the <i>FluentRestTemplate builder phase</i> by internally using {@linkplain
@@ -49,7 +48,7 @@ public interface UriStarter {
    * @param uri Standard {@linkplain URI URI}.
    * @return The ExecutorUriBuilder that will handle the <i>FluentRestTemplate builder phase</i>.
    */
-  ExecutorUriBuilder from(@NonNull final URI uri);
+  ExecutorUriBuilder from(final URI uri);
 
   /**
    * Starts the <i>FluentRestTemplate builder phase</i> by receving an instance of FluentService.
@@ -57,5 +56,5 @@ public interface UriStarter {
    * @param service A non null {@linkplain FluentService FluentService}.
    * @return An intermediate starter phase to request (or not) a Service's endpoint key.
    */
-  UriServiceBuilder from(@NonNull final FluentService service);
+  UriServiceBuilder from(final FluentService service);
 }

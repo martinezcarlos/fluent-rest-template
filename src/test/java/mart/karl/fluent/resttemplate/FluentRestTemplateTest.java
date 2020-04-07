@@ -17,10 +17,10 @@
 
 package mart.karl.fluent.resttemplate;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.function.Consumer;
 import mart.karl.fluent.service.FluentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,8 +109,8 @@ class FluentRestTemplateTest {
     // Given
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willThrow(new RestClientException(DUMMY_MESSAGE));
-    final FluentService service =
-        FluentService.from(UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri());
+    final URI uri = UriComponentsBuilder.fromUriString(DUMMY_URI).build().toUri();
+    final FluentService service = FluentService.from(uri).build();
     // When
     // Then
     assertThrows(
@@ -137,25 +137,6 @@ class FluentRestTemplateTest {
     // When
     final ResponseEntity<String> execute =
         fluent.post().into(DUMMY_URI).executor().headers(headers).execute(TYPE_REFERENCE);
-    // Then
-    then(restTemplate)
-        .should()
-        .exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class));
-    assertThat(execute).extracting(ResponseEntity::getStatusCode).isEqualTo(HttpStatus.OK);
-    assertThat(execute).extracting(HttpEntity::getBody).isNotNull();
-  }
-
-  @Test
-  void postNoBodyHeadersConsumer() {
-    // Given
-    given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
-        .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
-    final HttpHeaders headers = new HttpHeaders();
-    headers.set(FOO, BAR);
-    final Consumer<HttpHeaders> headersConsumer = c -> c.putAll(headers);
-    // When
-    final ResponseEntity<String> execute =
-        fluent.post().into(DUMMY_URI).executor().headers(headersConsumer).execute(TYPE_REFERENCE);
     // Then
     then(restTemplate)
         .should()
@@ -208,7 +189,7 @@ class FluentRestTemplateTest {
     // Given
     given(restTemplate.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
         .willReturn(ResponseEntity.ok(DUMMY_RESPONSE));
-    final FluentService service = FluentService.from(DUMMY_URI_WITH_FOO);
+    final FluentService service = FluentService.from(DUMMY_URI_WITH_FOO).build();
     final MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
     queryParams.put(FOO, Arrays.asList(BAR, BAZ));
     // When
@@ -256,7 +237,7 @@ class FluentRestTemplateTest {
     final SimpleClientHttpRequestFactory factory =
         Mockito.mock(SimpleClientHttpRequestFactory.class);
     given(restTemplate.getRequestFactory()).willReturn(factory);
-    final FluentService service = FluentService.from(DUMMY_URI);
+    final FluentService service = FluentService.from(DUMMY_URI).build();
     // When
     assertThrows(
         UnsupportedOperationException.class,
@@ -273,7 +254,7 @@ class FluentRestTemplateTest {
     // Given
     final ClientHttpRequestFactory factory = Mockito.mock(ClientHttpRequestFactory.class);
     given(restTemplate.getRequestFactory()).willReturn(factory);
-    final FluentService service = FluentService.from(DUMMY_URI);
+    final FluentService service = FluentService.from(DUMMY_URI).build();
     // When
     final ResponseEntity<String> execute =
         fluent

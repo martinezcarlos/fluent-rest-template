@@ -21,6 +21,8 @@ import java.net.URI;
 import java.util.Collections;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,10 +42,12 @@ class FluentServiceTest {
   private static final String BUY_BEER = "buyBeer";
   private static final String QUERY = "baz=boom&la=le";
   private static final String DUMMY_URI2 = "https://foo.bar:80/any-path?" + QUERY;
+  private static final String FRAGMENT = "fragment";
 
   @Test
   void givenServiceHasEndpoints_whenUriIsBuilt_thenEndpointValueIsPresent() {
     // Given
+    final MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
     final FluentService service =
         FluentService.builder()
             .scheme(SCHEME)
@@ -52,6 +56,8 @@ class FluentServiceTest {
             .contextPath(CONTEXT_PATH)
             .version(V_1)
             .endpoints(Collections.singletonMap(FOO, BAR))
+            .commonQueryParams(multiValueMap)
+            .commonFragment(FRAGMENT)
             .build();
     final String path = String.format("/%s/%s/%s", CONTEXT_PATH, V_1, BAR);
     // When
@@ -63,7 +69,7 @@ class FluentServiceTest {
         .hasPort(Integer.parseInt(PORT))
         .hasPath(path)
         .hasNoQuery()
-        .hasNoFragment();
+        .hasFragment(FRAGMENT);
   }
 
   @Test
@@ -73,10 +79,9 @@ class FluentServiceTest {
     // When
     final FluentService service =
         FluentService.from(uri)
-            .commonQueryParams("lala", "lele", "lolo")
-            .endpoint("foo", "bar")
             .endpoints(Collections.singletonMap(FOO, BAR))
-            .version(VERSION);
+            .version(VERSION)
+            .build();
     // Then
     assertThat(service)
         .extracting(FluentService::uriBuilder)
@@ -91,15 +96,13 @@ class FluentServiceTest {
     final URI uri = URI.create(DUMMY_URI);
     // When
     final FluentService service =
-        FluentService.from(uri)
-            .endpoints(Collections.singletonMap(FOO, BAR))
-            .endpoint(MY_KEY, BUY_BEER);
+        FluentService.from(uri).endpoints(Collections.singletonMap(FOO, BAR)).build();
     // Then
     assertThat(service)
         .extracting(s -> s.uriBuilder(MY_KEY))
         .extracting(FluentService.ServiceUriBuilder::build)
         .extracting(URI::getPath)
-        .isEqualTo(PATH + "/" + BUY_BEER);
+        .isEqualTo(PATH);
   }
 
   @Test
@@ -107,7 +110,7 @@ class FluentServiceTest {
     // Given
     final URI uri = URI.create(DUMMY_URI2);
     // When
-    final FluentService service = FluentService.from(uri);
+    final FluentService service = FluentService.from(uri).build();
     // Then
     assertThat(service)
         .extracting(FluentService::uriBuilder)
@@ -120,40 +123,21 @@ class FluentServiceTest {
   void givenCommonParamsAreSet_whenServiceIsCreated_commonParamsAreOverridden() {
     // Given
     final HttpHeaders map1 = new HttpHeaders();
-    map1.add("baz", "test3");
+    map1.add("baz", "firstCommon");
     final HttpHeaders map2 = new HttpHeaders();
-    map2.add("baz", "test6");
+    map2.add("baz", "thisWillRemain");
     final FluentService service =
-        FluentService.from(DUMMY_URI)
-            .commonQueryParams("baz", "test1")
-            .commonQueryParams("baz", Collections.singletonList("test2"))
-            .commonQueryParams(map1)
-            .commonFragment("oldFragment");
+        FluentService.from(DUMMY_URI).commonQueryParams(map1).commonFragment("oldFragment").build();
     // When
     final URI uri =
         service
             .uriBuilder()
-            .queryParam("baz", "test4")
-            .queryParam("baz", Collections.singletonList("test5"))
+            .queryParam("baz", "lost1")
+            .queryParam("baz", Collections.singletonList("lost2"))
             .queryParams(map2)
             .fragment("newFragment")
             .build();
     // Then
-    assertThat(uri)
-        .hasQuery("baz=test1&baz=test2&baz=test3&baz=test4&baz=test5&baz=test6")
-        .hasFragment("newFragment");
-  }
-
-  @Test
-  void givenService_whenSettingNullEndpointsAndParams_thenTheyAreNotNull() {
-    // Given
-    final FluentService service = new FluentService();
-    // When
-    service.setEndpoints(null);
-    service.setCommonQueryParams(null);
-    final URI uri =
-        service.endpoint("foo", "bar").commonQueryParams("foo", "bar").uriBuilder("foo").build();
-    // Then
-    assertThat(uri).hasPath("/bar").hasQuery("foo=bar");
+    assertThat(uri).hasQuery("baz=thisWillRemain").hasFragment("newFragment");
   }
 }

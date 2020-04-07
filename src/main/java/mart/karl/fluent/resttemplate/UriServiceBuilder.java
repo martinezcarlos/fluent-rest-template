@@ -19,7 +19,6 @@ package mart.karl.fluent.resttemplate;
 
 import java.net.URI;
 import mart.karl.fluent.service.FluentService;
-import org.springframework.lang.Nullable;
 
 /**
  * Intermediate starter phase to explicity request the user to provide (or not) a Service's endpoint
@@ -39,7 +38,7 @@ public interface UriServiceBuilder {
    *     the given key.
    * @return A ExecutorUriBuilder in charge of the URI builder phase.
    */
-  ExecutorUriBuilder withEndpoint(@Nullable String key);
+  ExecutorUriBuilder withEndpoint(String key);
 
   /**
    * Using a given {@linkplain FluentService}, transitions to the {@linkplain FluentRestTemplate}'s

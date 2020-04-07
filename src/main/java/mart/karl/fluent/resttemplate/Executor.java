@@ -19,7 +19,6 @@ package mart.karl.fluent.resttemplate;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.function.Consumer;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -63,15 +62,6 @@ public interface Executor {
    * @return The Executor instance invoking this method.
    */
   Executor headers(HttpHeaders headers);
-
-  /**
-   * Manipuletes this entity's headers by means of {@linkplain
-   * RequestEntity.BodyBuilder#headers(Consumer)}.
-   *
-   * @param consumer HttpHeaders consumer to manipulate existing headers.
-   * @return The Executor instance invoking this method.
-   */
-  Executor headers(Consumer<HttpHeaders> consumer);
 
   /**
    * Set the list of acceptable {@linkplain MediaType media types}, as specified by the {@code
