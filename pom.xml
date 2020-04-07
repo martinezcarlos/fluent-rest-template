@@ -112,8 +112,6 @@
     <assertj-core.version>3.15.0</assertj-core.version>
   </properties>
   <!-- Lowest spring-web release to support RestTemplate and RequestEntity 4.1.0.RELEASE -->
-  <!-- Lowest spring-web release to support RestTemplate, RequestEntity
-    ~ and headersConsumer 5.2.0.RELEASE -->
 
   <dependencies>
     <dependency>
