@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import mart.karl.fluent.service.FluentService;
 import org.springframework.core.ParameterizedTypeReference;
@@ -34,8 +33,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -77,9 +74,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  * methods according to the followed build path.<br>
  * <br>
  *
- * <h2>FluentRestTemplate initialisation</h2>
+ * <h2>FluentRestTemplate initialization</h2>
  *
- * <p>There are several ways on how you can initialise a FluentRestTemplate. This is a simple, yet
+ * <p>There are several ways on how you can initialize a FluentRestTemplate. This is a simple, yet
  * recommended one:
  *
  * <pre class="code">
@@ -109,7 +106,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * <pre class="code">
  * String uriString = "http://dummy.uri/foo/{foo}";
- * ResponseEntity&lt;String;&gt; response =
+ * ResponseEntity&lt;String&gt; response =
  *   fluentRestTemplate
  *   .get()                     // starter phase
  *   .from(uriString)           // builder phase
@@ -154,7 +151,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RequiredArgsConstructor
 public final class FluentRestTemplate {
 
-  @NonNull private final RestTemplate restTemplate;
+  private final RestTemplate restTemplate;
 
   /**
    * Starts a FluentRestTemplate flow indicating that the REST verb to use in the invokation is
@@ -196,7 +193,7 @@ public final class FluentRestTemplate {
    * @param <T> Request body's class type.
    * @return A UriStarter used transition to the builder phase.
    */
-  public <T> UriBodyStarter post(@Nullable final T body) {
+  public <T> UriBodyStarter post(final T body) {
     return new FluentRestTemplateManager<>(restTemplate, HttpMethod.POST, body);
   }
 
@@ -220,7 +217,7 @@ public final class FluentRestTemplate {
    * @param <T> Request body's class type.
    * @return A UriStarter used transition to the builder phase.
    */
-  public <T> UriBodyStarter put(@Nullable final T body) {
+  public <T> UriBodyStarter put(final T body) {
     return new FluentRestTemplateManager<>(restTemplate, HttpMethod.PUT, body);
   }
 
@@ -300,7 +297,7 @@ public final class FluentRestTemplate {
    * @param <T> Request body's class type.
    * @return A UriStarter used transition to the builder phase.
    */
-  public <T> UriBodyStarter patch(@Nullable final T body) {
+  public <T> UriBodyStarter patch(final T body) {
     if (restTemplate.getRequestFactory() instanceof SimpleClientHttpRequestFactory) {
       // https://github.com/spring-projects/spring-framework/issues/19618
       throw new UnsupportedOperationException(
@@ -317,41 +314,41 @@ public final class FluentRestTemplate {
     private final T body;
 
     @Override
-    public ExecutorUriBuilder from(@NonNull final String uriString) {
+    public ExecutorUriBuilder from(final String uriString) {
       Assert.hasText(uriString, "uriString must not be null or empty");
       return new DefaultExecutorUriBuilder<>(
-          restTemplate, httpMethod, body, FluentService.from(uriString).uriBuilder());
+          restTemplate, httpMethod, body, FluentService.from(uriString).build().uriBuilder());
     }
 
     @Override
-    public ExecutorUriBuilder from(@NonNull final URI uri) {
+    public ExecutorUriBuilder from(final URI uri) {
       Assert.notNull(uri, "uri must not be null");
       return new DefaultExecutorUriBuilder<>(
-          restTemplate, httpMethod, body, FluentService.from(uri).uriBuilder());
+          restTemplate, httpMethod, body, FluentService.from(uri).build().uriBuilder());
     }
 
     @Override
-    public UriServiceBuilder from(@NonNull final FluentService service) {
+    public UriServiceBuilder from(final FluentService service) {
       Assert.notNull(service, "service must not be null");
       return new DefaultUriServiceBuilder<>(restTemplate, httpMethod, body, service);
     }
 
     @Override
-    public ExecutorUriBuilder into(@NonNull final String uriString) {
+    public ExecutorUriBuilder into(final String uriString) {
       Assert.hasText(uriString, "uriString must not be null or empty");
       return new DefaultExecutorUriBuilder<>(
-          restTemplate, httpMethod, body, FluentService.from(uriString).uriBuilder());
+          restTemplate, httpMethod, body, FluentService.from(uriString).build().uriBuilder());
     }
 
     @Override
-    public ExecutorUriBuilder into(@NonNull final URI uri) {
+    public ExecutorUriBuilder into(final URI uri) {
       Assert.notNull(uri, "uri must not be null");
       return new DefaultExecutorUriBuilder<>(
-          restTemplate, httpMethod, body, FluentService.from(uri).uriBuilder());
+          restTemplate, httpMethod, body, FluentService.from(uri).build().uriBuilder());
     }
 
     @Override
-    public UriServiceBuilder into(@NonNull final FluentService service) {
+    public UriServiceBuilder into(final FluentService service) {
       Assert.notNull(service, "service must not be null");
       return new DefaultUriServiceBuilder<>(restTemplate, httpMethod, body, service);
     }
@@ -440,13 +437,7 @@ public final class FluentRestTemplate {
 
       @Override
       public Executor headers(final HttpHeaders headers) {
-        requestEntityBuilder.headers(headers);
-        return this;
-      }
-
-      @Override
-      public Executor headers(final Consumer<HttpHeaders> consumer) {
-        requestEntityBuilder.headers(consumer);
+        // requestEntityBuilder.headers(headers);
         return this;
       }
 

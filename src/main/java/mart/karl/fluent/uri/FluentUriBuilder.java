@@ -21,12 +21,12 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Map;
 import mart.karl.fluent.service.FluentService;
-import org.springframework.lang.NonNull;
 import org.springframework.util.MultiValueMap;
 
 /**
- * Declares useful methods to provide {@linkplain URI URI} parts to be used during URI construction.
- * This class represents the <b>URI builder phase</b> of {@linkplain FluentService}.
+ * Declares useful methods to provide specific {@linkplain URI URI} parts to be used during URI
+ * construction. This interface represents the <b>URI builder phase</b> of {@linkplain
+ * FluentService}.
  *
  * @param <T> Type of an interface or concrete class inheriting from this interface. It'll be used
  *     as the return parameter for the declared methods.
@@ -35,56 +35,53 @@ public interface FluentUriBuilder<T extends FluentUriBuilder<T>> {
 
   /**
    * Registers query params to the {@linkplain FluentUriBuilder}. If FluentUriBuilder's query param
-   * <i>values</i> previously exist under the same <i>key</i>, this new value will be included in
+   * <i>values</i> previously existed under the same <i>key</i>, these new value will be included in
    * the list of that key. <br>
    * <br>
    *
-   * <p>If there are registered <i>common</i> query parameters during the fluent builder phase those
-   * will be used in the URI construction process as well.
+   * <p>If there are registered <i>common</i> query parameters during the fluent builder phase,
+   * those will be used in the URI construction process in conjunction with the ones provided here.
    *
    * @param key Key of the service's query params.
-   * @param values Values to include in the service's query params list.
+   * @param values Values to include in the service's query params list for the given key.
    * @return The FluentUriBuilder instance invoking this method.
    */
-  T queryParam(@NonNull String key, Object... values);
+  T queryParam(String key, Object... values);
 
   /**
    * Registers query params to the {@linkplain FluentUriBuilder}. If FluentUriBuilder's query param
-   * <i>values</i> previously exist under the same <i>key</i>, this new value will be included in
+   * <i>values</i> previously existed under the same <i>key</i>, these new value will be included in
    * the list of that key. <br>
    * <br>
    *
-   * <p>If there are registered <i>common</i> query parameters during the fluent builder phase those
-   * will be used in the URI construction process as well.
+   * <p>If there are registered <i>common</i> query parameters during the fluent builder phase,
+   * those will be used in the URI construction process in conjunction with the ones provided here.
    *
    * @param key Key of the service's query params.
-   * @param values Values to include in the service's query params list.
+   * @param values Values to include in the service's query params list for the given key.
    * @return The FluentUriBuilder instance invoking this method.
    */
-  T queryParam(@NonNull String key, @NonNull Collection<?> values);
+  T queryParam(String key, Collection<?> values);
 
   /**
-   * Registers a map of query params to the {@linkplain FluentUriBuilder}. If FluentUriBuilder's
-   * query param <i>values</i> previously exist under some of the same <i>keys</i> provided in the
-   * map, these new values will be included in the lists of those keys. <br>
+   * Registers a map of query params to the {@linkplain FluentUriBuilder}, removing any existing
+   * query params used to build this instance. Only the query params provided in the new map, if
+   * any, will remain.<br>
    * <br>
    *
-   * <p>If there are registered <i>common</i> query parameters during the fluent builder phase those
-   * will be used in the URI construction process as well.
-   *
-   * @param params Map of String key-values to include in the FluentUriBuilder's query params list.
+   * @param params Map of String key-values to with query params.
    * @return The FluentUriBuilder instance invoking this method.
    */
-  T queryParams(@NonNull MultiValueMap<String, String> params);
+  T queryParams(MultiValueMap<String, String> params);
 
   /**
    * Registers a fragment to the FluentUriBuilder. <br>
    * <br>
    *
-   * <p>If a specific fragment is provided during the uri builder phase, the <i>common</i> fragment
-   * is overriden by this specific fragment. If fragment is set to {@code null} during this phase,
-   * no fragment will be used in the resulting URI.<br>
-   * <br>
+   * <p>If a <i>common</i> fragment was provided during FluentService instantiation, it will be
+   * overriden. If fragment is set to {@code null} in this method, no fragment will be used in the
+   * resulting URI.<br>
+   * * <br>
    *
    * <p>If this method is not invoked during the URI builder phase and given that a <i>common</i>
    * fragment was supplied during the {@linkplain FluentService} starter phase, that <i>common</i>
@@ -103,15 +100,15 @@ public interface FluentUriBuilder<T extends FluentUriBuilder<T>> {
    * @param value Value of the service's uri variable
    * @return The FluentUriBuilder instance invoking this method.
    */
-  T uriVariable(@NonNull String key, @NonNull Object value);
+  T uriVariable(String key, Object value);
 
   /**
-   * Registers several service's uri variables provided by the given {@linkplain Map}. If a
-   * service's uri variable <i>value</i> exists under any of the <i>keys</i> provided by the Map,
-   * it's value is replaced.
+   * Registers several service's uri variables provided by the given {@linkplain Map}. If service's
+   * uri variables <i>values</i> exist under the <i>keys</i> provided by the Map, those values are
+   * overriden.
    *
    * @param variables Key-value map representing service's uri variables.
    * @return The FluentUriBuilder instance invoking this method.
    */
-  T uriVariables(@NonNull Map<String, ?> variables);
+  T uriVariables(Map<String, ?> variables);
 }
