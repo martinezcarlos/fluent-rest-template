@@ -20,65 +20,264 @@
     xmlns="http://maven.apache.org/POM/4.0.0"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.2.5.RELEASE</version>
-    <relativePath/> <!-- lookup parent from repository -->
-  </parent>
+
   <groupId>mart.karl</groupId>
   <artifactId>fluent-rest-template</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>fluent-rest-template</name>
+  <version>${revision}</version>
+
+  <name>Fluent RestTemplate</name>
   <description>Fluent Builder Pattern applied to common boilerplate code around RestTemplate
   </description>
+  <url>https://github.com/martinezcarlos/fluent-rest-template</url>
+  <inceptionYear>2020</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+      <comments>A business-friendly OSS license</comments>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>karl.mart</id>
+      <name>Carlos Martínez</name>
+      <email>ingcarlosmartinez@icloud.com</email>
+      <url>https://github.com/martinezcarlos</url>
+      <organization>Karl Mart</organization>
+      <roles>
+        <role>Project Architect</role>
+        <role>Principal Developer</role>
+      </roles>
+      <timezone>Europe/Madrid</timezone>
+      <properties>
+        <linkedInUrl>https://www.linkedin.com/in/carlosmartinezm/</linkedInUrl>
+      </properties>
+    </developer>
+  </developers>
+
+  <scm>
+    <developerConnection>scm:git:https://github.com/martinezcarlos/fluent-rest-template.git
+    </developerConnection>
+    <url>https://github.com/martinezcarlos/fluent-rest-template</url>
+    <tag>HEAD</tag>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>packagecloud.release</id>
+      <url>packagecloud+https://packagecloud.io/karl-mart/release</url>
+    </repository>
+    <snapshotRepository>
+      <id>packagecloud.snapshot</id>
+      <url>packagecloud+https://packagecloud.io/karl-mart/snapshot</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/martinezcarlos/fluent-rest-template/issues</url>
+  </issueManagement>
 
   <properties>
+    <!-- Project specific -->
+    <revision>1.0.0-SNAPSHOT</revision>
     <java.version>1.8</java.version>
+    <maven.compiler.source>${java.version}</maven.compiler.source>
+    <maven.compiler.target>${java.version}</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <project.scm.id>github</project.scm.id>
+    <!-- Core dependencies -->
+    <spring-web.version>4.1.0.RELEASE</spring-web.version>
+    <lombok.version>1.18.12</lombok.version>
+    <!-- Maven plugins -->
+    <maven-surefire-plugin.version>3.0.0-M4</maven-surefire-plugin.version>
+    <maven-release-plugin.version>3.0.0-M1</maven-release-plugin.version>
+    <maven-site-plugin.version>3.8.2</maven-site-plugin.version>
+    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+    <maven.version.range>[3.5,)</maven.version.range>
+    <java.version.range>[1.8,)</java.version.range>
+    <spring-web.version.range>(,4.1.0.RELEASE)</spring-web.version.range>
+    <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
+    <jacoco-maven-plugin.minimum-covered-ratio>0.80</jacoco-maven-plugin.minimum-covered-ratio>
+    <maven-packagecloud-wagon.version>0.0.6</maven-packagecloud-wagon.version>
+    <!-- Testing and metrics -->
+    <junit-jupiter-api.version>5.6.0</junit-jupiter-api.version>
+    <mockito-junit-jupiter.version>3.3.3</mockito-junit-jupiter.version>
+    <assertj-core.version>3.15.0</assertj-core.version>
   </properties>
+  <!-- Lowest spring-web release to support RestTemplate and RequestEntity 4.1.0.RELEASE -->
+  <!-- Lowest spring-web release to support RestTemplate, RequestEntity
+    ~ and headersConsumer 5.2.0.RELEASE -->
 
   <dependencies>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-devtools</artifactId>
-      <scope>runtime</scope>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-configuration-processor</artifactId>
-      <optional>true</optional>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>${spring-web.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
       <optional>true</optional>
     </dependency>
+    <!-- Testing -->
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit-jupiter-api.version}</version>
       <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>org.junit.vintage</groupId>
-          <artifactId>junit-vintage-engine</artifactId>
-        </exclusion>
-      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-junit-jupiter</artifactId>
+      <version>${mockito-junit-jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj-core.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
     <plugins>
       <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${maven-release-plugin.version}</version>
+        <configuration>
+          <scmCommentPrefix>[maven-release-plugin] [skip ci]</scmCommentPrefix>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>${maven-site-plugin.version}</version>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${maven-source-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${maven-javadoc-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven-enforcer-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-env-requirements</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>${java.version.range}</version>
+                </requireJavaVersion>
+                <requireMavenVersion>
+                  <version>${maven.version.range}</version>
+                </requireMavenVersion>
+                <bannedDependencies>
+                  <searchTransitive>true</searchTransitive>
+                  <excludes>
+                    <exclude>org.springframework:spring-web:${spring-web.version.range}</exclude>
+                  </excludes>
+                  <message>A banned dependency or plugin was found!</message>
+                </bannedDependencies>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>jacoco-check</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <rule>
+                  <element>PACKAGE</element>
+                  <limits>
+                    <limit>
+                      <counter>LINE</counter>
+                      <value>COVEREDRATIO</value>
+                      <minimum>${jacoco-maven-plugin.minimum-covered-ratio}</minimum>
+                    </limit>
+                  </limits>
+                </rule>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
+
+    <extensions>
+      <extension>
+        <groupId>io.packagecloud.maven.wagon</groupId>
+        <artifactId>maven-packagecloud-wagon</artifactId>
+        <version>${maven-packagecloud-wagon.version}</version>
+      </extension>
+    </extensions>
   </build>
 
 </project>

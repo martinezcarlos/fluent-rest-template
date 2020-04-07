@@ -1,0 +1,134 @@
+#
+# Copyright (c) 2020 Karl Mart
+# Carlos Martinez, ingcarlosmartinez@icloud.com
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+version: 2.1
+
+orbs:
+  #maven: circleci/maven@1.0.0
+  codecov: codecov/codecov@1.0.5
+
+commands:
+  load_dependency_cache:
+    description: Loads maven dependencies cache
+    steps:
+      - restore_cache:
+          keys:
+            - frt-{{ checksum "pom.xml" }}
+            - frt-
+  save_dependency_cache:
+    description: Saves maven dependencies cache
+    steps:
+      - save_cache:
+          key: frt-{{ checksum "pom.xml" }}
+          paths:
+            - ~/.m2
+  cache_dependencies:
+    description: Builds the project and prepares cache
+    steps:
+      - load_dependency_cache
+      - run: mvn verify -DskipTests
+      - run: mvn dependency:go-offline
+      - save_dependency_cache
+  set_git_credentials:
+    description: Sets Git credentials
+    steps:
+      - run: git config user.email "ingcarlosmartinez@icloud.com"
+      - run: git config user.name "Via CircleCI Build"
+
+executors:
+  java_8:
+    docker:
+      - image: circleci/openjdk:8u242-jdk
+    #working_directory: /home
+
+jobs:
+  prepare_dependencies:
+    description: Checkouts and builds dependencies
+    executor: java_8
+    steps:
+      - checkout
+      - cache_dependencies
+      - persist_to_workspace:
+          root: ~/project
+          paths: .
+  run_unit_tests:
+    description: Run tests, upload test results to CircleCi and stores coverage data into workspace
+    executor: java_8
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - load_dependency_cache
+      - run: mvn dependency:go-offline
+      - run: mvn test
+      - store_test_results:
+          path: target/surefire-reports
+      - persist_to_workspace:
+          root: ~/project
+          paths: .
+  upload_coverage:
+    description: uploads coverage data to Codecov
+    executor: java_8
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - codecov/upload
+  deploy_snapshot:
+    description: Deploys generated SNAPSHOT JAR to CircleCI
+    executor: java_8
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - load_dependency_cache
+      - set_git_credentials
+      - run: mvn deploy -s .circleci/settings.xml
+  make_release:
+    description: Deploys generated RELEASE JAR to CircleCI
+    executor: java_8
+    steps:
+      - attach_workspace:
+          at: ~/project
+      - load_dependency_cache
+      - set_git_credentials
+      - run: mvn --batch-mode release:prepare release:perform -s .circleci/settings.xml
+
+workflows:
+  build_test_deploy:
+    jobs:
+      - prepare_dependencies
+      - run_unit_tests:
+          requires:
+            - prepare_dependencies
+      - upload_coverage:
+          requires:
+            - run_unit_tests
+      - deploy_snapshot:
+          requires:
+            - run_unit_tests
+          filters:
+            branches:
+              only:
+                - develop
+      - make_release:
+          requires:
+            - run_unit_tests
+          filters:
+            branches:
+              only:
+                - master
+  #maven_test:
+  # jobs:
+  #   - maven/test # checkout, build, test, and upload test results to CircleCi
