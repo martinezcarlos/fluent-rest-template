@@ -136,7 +136,12 @@ class FluentRestTemplateTest {
     headers.set(FOO, BAR);
     // When
     final ResponseEntity<String> execute =
-        fluent.post().into(DUMMY_URI).executor().headers(headers).execute(TYPE_REFERENCE);
+        fluent
+            .post()
+            .into(DUMMY_URI)
+            .executor()
+            .contenType(MediaType.APPLICATION_JSON)
+            .execute(TYPE_REFERENCE);
     // Then
     then(restTemplate)
         .should()

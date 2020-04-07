@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import mart.karl.fluent.service.FluentService;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -39,8 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * A handy wrapper to construct and invoke remote REST services with a single functional expression.
- * <br>
+ * A handy wrapper to build and execute REST request calls with a single chain expression. <br>
  * <br>
  *
  * <p>In the background, FluentRestTemplate evolves in different phases of a workflow. These phases
@@ -89,7 +87,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *     return builder.build();
  *   }
  *
- *   // Use RestTemplate to build FluentRestTemplate.
+ *   // Use RestTemplate to build a FluentRestTemplate.
  *   {@code @Bean}
  *   public FluentRestTemplate initFluentRestTemplate(final RestTemplate restTemplate) {
  *     return new FluentRestTemplate(restTemplate);
@@ -129,7 +127,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  *
  * <p>invokes a PUT method in "https://cool-service.com/update/stuff/123" to update cool stuff,
  * providing a request body, accepting a JSON media type, with a locale de_DE and expects an updated
- * CoolSuff object as a result:
+ * CoolSuff object as response:
  *
  * <pre class="code">
  * FluentService myCoolService = ...
@@ -436,8 +434,8 @@ public final class FluentRestTemplate {
       }
 
       @Override
-      public Executor headers(final HttpHeaders headers) {
-        // requestEntityBuilder.headers(headers);
+      public Executor contenType(final MediaType mediaType) {
+        requestEntityBuilder.contentType(mediaType);
         return this;
       }
 

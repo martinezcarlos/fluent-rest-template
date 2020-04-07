@@ -20,7 +20,6 @@ package mart.karl.fluent.resttemplate;
 import java.net.URI;
 import java.nio.charset.Charset;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -53,15 +52,14 @@ public interface Executor {
   Executor header(String name, String... values);
 
   /**
-   * Registers a group of headers for the request. If headers <i>values</i> previously exist under
-   * some of the <i>names</i> provided in the input, these new values will be included in the list
-   * of those names. <br>
+   * Registers a header of type 'Content-Type' for the request. If a 'Content-Type' header
+   * previously existed, it is overridden. <br>
    * <br>
    *
-   * @param headers A {@linkplain HttpHeaders} data structure.
+   * @param mediaType media type of the 'Content-Type.
    * @return The Executor instance invoking this method.
    */
-  Executor headers(HttpHeaders headers);
+  Executor contenType(final MediaType mediaType);
 
   /**
    * Set the list of acceptable {@linkplain MediaType media types}, as specified by the {@code
