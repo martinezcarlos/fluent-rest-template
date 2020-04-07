@@ -21,7 +21,7 @@
 
   <groupId>mart.karl</groupId>
   <artifactId>fluent-rest-template</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
 
   <name>Fluent RestTemplate</name>
   <description>Fluent Builder Pattern applied to common boilerplate code around RestTemplate
@@ -60,7 +60,7 @@
     <developerConnection>scm:git:https://github.com/martinezcarlos/fluent-rest-template.git
     </developerConnection>
     <url>https://github.com/martinezcarlos/fluent-rest-template</url>
-    <tag>HEAD</tag>
+    <tag>fluent-rest-template-1.0.1</tag>
   </scm>
 
   <distributionManagement>
